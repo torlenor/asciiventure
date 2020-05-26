@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import "github.com/torlenor/asciiventure/game"
 
 func main() {
-	fmt.Printf("So it begins")
+	game := &game.Game{}
+	game.Setup()
+	game.GameLoop()
+	game.Shutdown()
 }

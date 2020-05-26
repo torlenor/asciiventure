@@ -1,0 +1,90 @@
+package renderers
+
+import (
+	"log"
+
+	"github.com/torlenor/asciiventure/components"
+	"github.com/veandco/go-sdl2/sdl"
+)
+
+// Renderer is able to render actual elements onto the correct screen positions.
+type Renderer struct {
+	GlyphWidth  int32
+	GlyphHeight int32
+
+	OriginX int32
+	OriginY int32
+
+	renderer *sdl.Renderer
+}
+
+func NewRenderer(renderer *sdl.Renderer) *Renderer {
+	return &Renderer{renderer: renderer}
+}
+
+func (r *Renderer) Destroy() {
+	r.renderer.Destroy()
+}
+
+func (r *Renderer) SetRenderTarget(texture *sdl.Texture) error {
+	return r.renderer.SetRenderTarget(texture)
+}
+
+func (r *Renderer) CreateTexture(format uint32, access int, w int32, h int32) (*sdl.Texture, error) {
+	return r.renderer.CreateTexture(format, access, w, h)
+}
+
+func (r *Renderer) CreateTextureFromSurface(surface *sdl.Surface) (*sdl.Texture, error) {
+	return r.renderer.CreateTextureFromSurface(surface)
+}
+
+func (r *Renderer) Present() {
+	r.renderer.Present()
+}
+
+func (r *Renderer) Clear() {
+	r.renderer.Clear()
+}
+
+func (r *Renderer) SetScale(scaleX float32, scaleY float32) error {
+	return r.renderer.SetScale(scaleX, scaleY)
+}
+
+func (r *Renderer) Copy(texture *sdl.Texture, src *sdl.Rect, dst *sdl.Rect) error {
+	return r.renderer.Copy(texture, src, dst)
+}
+
+// Render renders a texture starting at the upper left corner of the given character coordinate.
+func (r *Renderer) Render(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h int32) {
+	r.RenderWithOffset(t, src, cx, cy, w, h, 0, 0)
+}
+
+// RenderWithOffset renders a texture starting at the upper left corner at given character coordinate with the given pixel offset.
+func (r *Renderer) RenderWithOffset(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h, offsetX, offsetY int32) {
+	dst := &sdl.Rect{X: (cx+r.OriginX)*r.GlyphWidth - offsetX, Y: (cy+1+r.OriginY)*r.GlyphHeight - offsetY, W: w, H: h}
+	err := r.renderer.Copy(t, src, dst)
+	if err != nil {
+		log.Printf("Error in RenderWithOffset: %s", err)
+	}
+}
+
+// RenderGlyph renders a glyph at the given character coordinate
+func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int32) {
+	err := g.T.SetColorMod(g.Color.R, g.Color.G, g.Color.B)
+	if err != nil {
+		log.Printf("Error setting Color in RenderGlyph: %s", err)
+	}
+	r.RenderWithOffset(g.T, g.Src, cx, cy, g.Width, g.Height, g.OffsetX, g.OffsetY)
+}
+
+// FillCharCoordinate Draws a rectangle completely filling the given char coordinate
+func (r *Renderer) FillCharCoordinate(cx, cy int32, c components.ColorRGBA) {
+	cr, cg, cb, ca, _ := r.renderer.GetDrawColor()
+	var bm sdl.BlendMode
+	r.renderer.GetDrawBlendMode(&bm)
+	r.renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
+	r.renderer.SetDrawColor(c.R, c.G, c.B, c.A)
+	r.renderer.FillRect(&sdl.Rect{X: (cx + r.OriginX) * r.GlyphWidth, Y: (cy + r.OriginY) * r.GlyphHeight, W: r.GlyphWidth, H: r.GlyphHeight})
+	r.renderer.SetDrawColor(cr, cg, cb, ca)
+	r.renderer.SetDrawBlendMode(bm)
+}

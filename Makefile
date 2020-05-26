@@ -5,7 +5,8 @@
 #
 
 .PHONY: update clean build build-all test authors dist vendor build-container-latest \
-build-container-tagged build-container-gitcommit release-container release-container-gitcommit
+build-container-tagged build-container-gitcommit release-container release-container-gitcommit \
+run
 
 NAME := asciiventure
 BINARIES := ${NAME}
@@ -141,3 +142,5 @@ release-container-gitcommit: build-container-gitcommit
 	@echo Pushing docker image ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
 	docker push ${DOCKERBASETAG}:${VERSION}-${CURRENTGITCOMMIT}${CURRENTGITUNTRACKED}
 
+run: build
+	./bin/${NAME}
