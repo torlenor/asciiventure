@@ -26,6 +26,10 @@ func (r *Renderer) Destroy() {
 	r.renderer.Destroy()
 }
 
+func (r *Renderer) GetRenderer() *sdl.Renderer {
+	return r.renderer
+}
+
 func (r *Renderer) SetRenderTarget(texture *sdl.Texture) error {
 	return r.renderer.SetRenderTarget(texture)
 }

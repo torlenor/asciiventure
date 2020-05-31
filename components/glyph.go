@@ -1,7 +1,6 @@
 package components
 
 import (
-	"github.com/torlenor/asciiventure/entities"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -19,5 +18,3 @@ type Glyph struct {
 	OffsetX int32
 	OffsetY int32
 }
-
-type GlyphManager map[entities.Entity]Glyph

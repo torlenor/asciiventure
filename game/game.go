@@ -1,18 +1,17 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
+	"math/rand"
 	"time"
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
-	"github.com/torlenor/asciiventure/entities"
+	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/maps"
 	"github.com/torlenor/asciiventure/renderers"
+	"github.com/torlenor/asciiventure/ui"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -21,16 +20,34 @@ import (
 const (
 	windowName = "Asciiventure"
 
-	fontPath = "./assets/fonts/Roboto-Regular.ttf"
-	fontSize = 24
+	fontPath = "./assets/fonts/RobotoMono-Regular.ttf"
+	fontSize = 16
 
-	screenWidth  = 820
-	screenHeight = 1000
+	screenWidth  = 1366
+	screenHeight = 768
 
 	latticeDX = 19
 	latticeDY = 32
 
 	playerViewRange = 10
+)
+
+type gameState int
+
+const (
+	playersTurn gameState = iota
+	enemyTurn
+	gameOver
+)
+
+func (d gameState) String() string {
+	return [...]string{"playersTurn", "enemyTurn", "gameOver"}[d]
+}
+
+var (
+	roomRenderPane      = sdl.Rect{X: screenHeight / 6, Y: 0, W: screenWidth, H: screenHeight - screenHeight/6}
+	characterWindowRect = sdl.Rect{X: 0, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
+	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
 )
 
 // Game is the main struct of the game
@@ -54,29 +71,31 @@ type Game struct {
 
 	markedPath []components.Position
 
-	roomEntities   []entities.Entity
-	collision      components.CollisionManager
-	glyph          components.GlyphManager
-	position       components.PositionManager
-	targetPosition components.PositionManager
-	player         entities.Entity
+	player   *entity.Entity
+	entities []*entity.Entity
 
 	time uint32
 
-	nextStep bool
+	nextStep  bool
+	gameState gameState
+
+	characterWindow *ui.TextWidget
+	logWindow       *ui.TextWidget
 }
 
 // Setup should be called first after creating an instance of Game.
 func (g *Game) Setup() {
 	g.renderScale = 1.0
 
-	g.collision = make(components.CollisionManager)
-	g.glyph = make(components.GlyphManager)
-	g.position = make(components.PositionManager)
-	g.targetPosition = make(components.PositionManager)
-
 	g.setupWindow()
 	g.setupRenderer()
+
+	g.gameState = playersTurn
+
+	g.characterWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &characterWindowRect)
+	g.characterWindow.SetWrapLength(int(characterWindowRect.W))
+	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect)
+	g.logWindow.SetWrapLength(int(logWindowRect.W))
 }
 
 // Shutdown should be called when the program quits.
@@ -100,12 +119,16 @@ func (g *Game) GameLoop() {
 
 	ticker := time.NewTicker(time.Second / 15)
 
-	g.currentRoom.UpdateFoV(playerViewRange, g.position[g.player].X, g.position[g.player].Y)
+	g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
+	g.updateCharacterWindow()
+	g.logWindow.SetText([]string{"Welcome to <Epic Name Here>.", "A small cat takes a stroll and ends up in an epic adventure."})
 
 	for !g.quit {
 		start := time.Now()
 		g.handleSDLEvents()
-		g.timestep()
+		if g.gameState != gameOver {
+			g.timestep()
+		}
 		gameLogicUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
 
 		start = time.Now()
@@ -114,47 +137,12 @@ func (g *Game) GameLoop() {
 		start = time.Now()
 		<-ticker.C
 		spareMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-		if true {
+		if false {
 			fmt.Printf("Game logic duration: %.2f ms, draw duration: %.2f ms, total: %.2f ms, spare: %.2f ms\n", gameLogicUpdateMs, drawUpdateMs, gameLogicUpdateMs+drawUpdateMs, spareMs)
 		}
 	}
 
 	ticker.Stop()
-}
-
-func (g *Game) setupWindow() {
-	err := ttf.Init()
-	if err != nil {
-		log.Fatalf("Failed to initialize ttf: %s", err)
-	}
-
-	if g.defaultFont, err = ttf.OpenFont(fontPath, fontSize); err != nil {
-		log.Fatalf("Failed to load font '%s': %s", fontPath, err)
-	}
-
-	err = sdl.Init(sdl.INIT_VIDEO)
-	if err != nil {
-		log.Fatalf("Failed to initialize sdl: %s", err)
-	}
-
-	g.window, err = sdl.CreateWindow(windowName, sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
-	if err != nil {
-		log.Fatalf("Failed to create window: %s", err)
-	}
-
-	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "1")
-}
-
-func (g *Game) setupRenderer() {
-	// renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC|sdl.RENDERER_ACCELERATED)
-	renderer, err := sdl.CreateRenderer(g.window, -1, sdl.RENDERER_ACCELERATED)
-	if err != nil {
-		log.Fatalf("Failed to create renderer: %s", err)
-	}
-	g.renderer = renderers.NewRenderer(renderer)
-	g.renderer.GlyphWidth = latticeDX
-	g.renderer.GlyphHeight = latticeDY
 }
 
 func (g *Game) createGlyphTexture() {
@@ -165,176 +153,91 @@ func (g *Game) createGlyphTexture() {
 	}
 }
 
-func (g *Game) loadRoomsFromDirectory(dir string) {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	g.loadedRooms = []*maps.Room{}
-	for _, f := range files {
-		if !f.IsDir() {
-			f, err := os.Open(dir + "/" + f.Name())
-			if err != nil {
-				log.Printf("Error opening %s: %s", f.Name(), err)
-				continue
-			}
-			r4 := bufio.NewReader(f)
-			r, err := maps.NewRoom(r4, g.glyphTexture)
-			if err != nil {
-				log.Printf("Error reading room file: %s", err)
-				continue
-			}
-
-			g.loadedRooms = append(g.loadedRooms, &r)
-		}
-	}
-}
 func (g *Game) createPlayer() {
 	if gl, ok := g.glyphTexture.Get("@"); ok {
-		e := entities.NewEntity()
-		g.position[e] = components.Position{}
 		gl.Color = components.ColorRGB{R: 0, G: 128, B: 255}
-		g.glyph[e] = gl
-		g.collision[e] = components.Collision{V: true}
-		g.roomEntities = append(g.roomEntities, e)
+		e := entity.NewEntity("Player", gl, components.Position{}, true)
+		e.Combat = &components.Combat{MaxHP: 20, HP: 20, Power: 5, Defense: 2}
+		g.entities = append(g.entities, e)
 		g.player = e
 	} else {
 		log.Printf("Unable to add player entity")
 	}
 }
 
-func (g *Game) createEnemy(p components.Position) {
-	if gl, ok := g.glyphTexture.Get("e"); ok {
-		e := entities.NewEntity()
-		g.position[e] = p
-		gl.Color = components.ColorRGB{R: 255, G: 0, B: 0}
-		g.glyph[e] = gl
-		g.collision[e] = components.Collision{V: true, DestroyOnCollision: true}
-		g.roomEntities = append(g.roomEntities, e)
-	} else {
-		log.Printf("Unable to add enemy entity")
+func (g *Game) createMouse(p components.Position) *entity.Entity {
+	if gl, ok := g.glyphTexture.Get("m"); ok {
+		gl.Color = components.ColorRGB{R: 200, G: 200, B: 200}
+		e := g.createEnemy("Mouse", gl, p)
+		e.Combat = &components.Combat{MaxHP: 2, HP: 2, Power: 1, Defense: 0}
+		return e
 	}
+	log.Printf("Unable to add mouse entity")
+	return nil
+}
+
+func (g *Game) createDog(p components.Position) *entity.Entity {
+	if gl, ok := g.glyphTexture.Get("d"); ok {
+		gl.Color = components.ColorRGB{R: 255, G: 0, B: 0}
+		e := g.createEnemy("Dog", gl, p)
+		e.Combat = &components.Combat{MaxHP: 10, HP: 10, Power: 5, Defense: 2}
+		return e
+	}
+	log.Printf("Unable to add dog entity")
+	return nil
+}
+
+func (g *Game) createEnemy(name string, gl components.Glyph, p components.Position) *entity.Entity {
+	e := entity.NewEntity(name, gl, p, true)
+	e.TargetPosition = p
+	return e
+}
+
+func (g *Game) occupied(x, y int32) bool {
+	for _, e := range g.entities {
+		if e.Position.X == x && e.Position.Y == y {
+			return true
+		}
+	}
+	return false
 }
 
 func (g *Game) createEnemyEntities() {
-	g.createEnemy(components.Position{X: 2, Y: 2})
-}
-
-func (g *Game) selectRoom(r int) {
-	r--
-	if r < 0 || r >= len(g.loadedRooms) {
-		return
+	maxx, maxy := g.currentRoom.Dimensions()
+	for i := 0; i < 10; i++ {
+		x := int32(rand.Intn(int(maxx)))
+		y := int32(rand.Intn(int(maxy)))
+		if g.occupied(x, y) || !g.currentRoom.Empty(x, y) {
+			continue
+		}
+		if rand.Intn(100) < 50 {
+			e := g.createMouse(components.Position{X: x, Y: y})
+			if e != nil {
+				g.entities = append(g.entities, e)
+			}
+		} else {
+			e := g.createDog(components.Position{X: x, Y: y})
+			if e != nil {
+				g.entities = append(g.entities, e)
+			}
+		}
 	}
-
-	g.currentRoom = g.loadedRooms[r]
-
-	g.preRenderRoom()
-
-	g.position[g.player] = components.Position{X: (g.currentRoom.SpawnPoint.X), Y: g.currentRoom.SpawnPoint.Y}
-	g.targetPosition[g.player] = g.position[g.player]
-
-	g.currentRoom.ClearSeen()
-	g.currentRoom.UpdateFoV(playerViewRange, g.position[g.player].X, g.position[g.player].Y)
-}
-
-func (g *Game) removeEntity(e entities.Entity) {
-	delete(g.collision, e)
-	delete(g.glyph, e)
-	delete(g.position, e)
-}
-
-func (g *Game) isEmpty(x, y int32) bool {
-	_, o := g.occupied(x, y)
-	return g.currentRoom.Empty(x, y) && !o
-}
-
-func (g *Game) updateMouse(x, y int32) {
-	g.mouseTileX = int32((float32(x)+0.5)/latticeDX/g.renderScale) - g.renderer.OriginX
-	g.mouseTileY = int32((float32(y)+0.5)/latticeDY/g.renderScale) - g.renderer.OriginY
-	g.markedPath = g.determineLatticePathPlayerMouse()
 }
 
 func (g *Game) renderEntities() {
-	for id, gl := range g.glyph {
-		if p, ok := g.position[id]; ok {
-			g.renderer.RenderGlyph(gl, p.X, p.Y)
+	for _, e := range g.entities {
+		if e == g.player || (e.Position.X == g.player.Position.X && e.Position.Y == g.player.Position.Y) {
+			continue
+		}
+		if g.currentRoom.Visible(e.Position.X, e.Position.Y) {
+			g.renderer.RenderGlyph(e.Glyph, e.Position.X, e.Position.Y)
 		}
 	}
-}
-
-func (g *Game) determineLatticePathPlayerMouse() []components.Position {
-	return determineLatticePath(components.Position{X: g.position[g.player].X, Y: g.position[g.player].Y}, components.Position{X: g.mouseTileX, Y: g.mouseTileY})
-}
-
-func (g *Game) renderMouseTile() {
-	if g.position[g.player].X != g.targetPosition[g.player].X ||
-		g.position[g.player].Y != g.targetPosition[g.player].Y {
-		path := determineLatticePath(g.position[g.player], g.targetPosition[g.player])
-		for _, p := range path {
-			_, occupied := g.occupied(p.X, p.Y)
-			notEmpty := !g.currentRoom.Empty(p.X, p.Y)
-			color := components.ColorRGBA{R: 100, G: 100, B: 255, A: 128}
-			if occupied || notEmpty {
-				color = components.ColorRGBA{R: 255, G: 100, B: 100, A: 128}
-			}
-			g.renderer.FillCharCoordinate(p.X, p.Y, color)
-			if notEmpty || occupied {
-				break
-			}
-		}
-		if gl, ok := g.glyphTexture.Get("X"); ok {
-			gl.Color = components.ColorRGB{R: 255, G: 0, B: 0}
-			g.renderer.RenderGlyph(gl, g.targetPosition[g.player].X, g.targetPosition[g.player].Y)
-		}
-	}
-
-	for _, p := range g.markedPath {
-		_, occupied := g.occupied(p.X, p.Y)
-		notEmpty := !g.currentRoom.Empty(p.X, p.Y)
-		color := components.ColorRGBA{R: 100, G: 255, B: 100, A: 128}
-		if occupied || notEmpty {
-			color = components.ColorRGBA{R: 255, G: 100, B: 100, A: 128}
-		}
-		g.renderer.FillCharCoordinate(p.X, p.Y, color)
-		if notEmpty || occupied {
-			break
-		}
-	}
-	if len(g.markedPath) > 0 {
-		p := g.markedPath[len(g.markedPath)-1]
-		color := components.ColorRGBA{R: 128, G: 128, B: 128, A: 180}
-		g.renderer.FillCharCoordinate(p.X, p.Y, color)
-	}
-}
-
-func (g *Game) preRenderRoom() {
-	var err error
-	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
-		sdl.TEXTUREACCESS_TARGET, int32(screenWidth/g.renderScale), int32(screenHeight/g.renderScale))
-	if err != nil {
-		log.Printf("Error creating texture: %s", err)
-	}
-	err = g.renderer.SetRenderTarget(g.mapTexture)
-	g.renderer.Clear()
-	if err != nil {
-		log.Printf("Error setting texture as render target: %s", err)
-	}
-	g.currentRoom.Render(g.renderer, g.renderer.OriginX, g.renderer.OriginY)
-	g.renderer.Present()
-	g.renderer.SetRenderTarget(nil)
-}
-
-func (g *Game) occupied(x, y int32) (entities.Entity, bool) {
-	for e, p := range g.position {
-		if p.X == x && p.Y == y {
-			return e, true
-		}
-	}
-	return 0, false
+	g.renderer.RenderGlyph(g.player.Glyph, g.player.Position.X, g.player.Position.Y)
 }
 
 func (g *Game) setPlayerTargetPosition(x, y int32) {
-	g.targetPosition[g.player] = components.Position{X: x, Y: y}
+	g.player.TargetPosition = components.Position{X: x, Y: y}
 }
 
 func (g *Game) draw() {
@@ -345,37 +248,27 @@ func (g *Game) draw() {
 	// We are actually rendering it in total again because of FoV updates and some flickering which we encountered when pre-rendering
 	g.currentRoom.Render(g.renderer, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderEntities()
-	g.renderMouseTile()
-	g.drawGameTime()
+	if g.gameState != gameOver {
+		g.renderMouseTile()
+	}
+	g.renderer.SetScale(1, 1)
+	g.characterWindow.Render()
+	g.logWindow.Render()
 
 	g.renderer.Present()
 }
 
-func (g *Game) drawGameTime() {
-	// TODO: Rendering game time is slow
-	surface, err := g.defaultFont.RenderUTF8Blended(fmt.Sprintf("Time: %d", g.time), sdl.Color{R: 0, G: 255, B: 0, A: 255})
-	if err != nil {
-		log.Printf("Error rendering game time: %s", err)
-		return
-	}
-
-	t, err := g.renderer.CreateTextureFromSurface(surface)
-	if err != nil {
-		fmt.Printf("Failed to create texture from surface when trying to render game time: %s\n", err)
-		return
-	}
-
-	g.renderer.Copy(t, nil, &sdl.Rect{X: int32(float32(screenWidth-surface.W) / g.renderScale), Y: 0, W: surface.W, H: surface.H})
-
-	surface.Free()
-	t.Destroy()
+func (g *Game) updateCharacterWindow() {
+	g.characterWindow.SetText([]string{fmt.Sprintf("Time: %d", g.time), fmt.Sprintf("Health: %d/%d", g.player.Combat.HP, g.player.Combat.MaxHP)})
 }
 
 func (g *Game) timestep() {
 	if g.nextStep {
-		g.updatePositions()
-		g.currentRoom.UpdateFoV(playerViewRange, g.position[g.player].X, g.position[g.player].Y)
+		g.updatePositions(playersTurn)
+		g.updatePositions(enemyTurn)
+		g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
 		g.time++
+		g.updateCharacterWindow()
 		g.nextStep = false
 	}
 }

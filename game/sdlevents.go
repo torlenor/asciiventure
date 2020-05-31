@@ -3,7 +3,6 @@ package game
 import (
 	"strconv"
 
-	"github.com/torlenor/asciiventure/components"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -75,9 +74,6 @@ func (g *Game) handleSDLEvents() {
 					case "-":
 						g.renderScale -= 0.1
 						g.preRenderRoom()
-						continue
-					case "e":
-						g.createEnemy(components.Position{X: g.mouseTileX, Y: g.mouseTileY})
 						continue
 					}
 				}

@@ -3,7 +3,8 @@ package game
 import "github.com/torlenor/asciiventure/components"
 
 func determineLatticePath(origin components.Position, target components.Position) []components.Position {
-	// TODO: determineLatticePath should take into account occupied tiles and be able to suggest a way around it
+	// TODO: determineLatticePath should take into account occupied tiles and be able to suggest a way around it.
+	// https://en.wikipedia.org/wiki/A*_search_algorithm
 	current := origin
 	s := []components.Position{}
 	for target.X != current.X || target.Y != current.Y {

@@ -72,11 +72,11 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 			if c == "@" {
 				if spawnPointSet {
 					log.Printf("Warning: Player spawn point defined more than once")
-					continue
+					c = " "
 				}
 				room.SpawnPoint = SpawnPoint{X: int32(x), Y: int32(y)}
 				spawnPointSet = true
-				continue
+				c = " "
 			}
 
 			room.Colors[int32(y)][int32(x)] = components.ColorRGB{
@@ -117,12 +117,31 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 func (r *Room) Empty(x, y int32) bool {
 	if y, ok := r.Tiles[y]; ok {
 		if x, ok := y[x]; ok {
-			if !x.Seen {
-				return true
-			} else if x.Char != emptyChar {
+			if x.Char != emptyChar {
 				return false
 			}
 		}
 	}
 	return true
+}
+
+func (r *Room) Visible(x, y int32) bool {
+	return r.Tiles[y][x].Visible
+}
+
+// Dimensions returns the max width and height of the room.
+func (r *Room) Dimensions() (int32, int32) {
+	maxx := int32(0)
+	maxy := int32(0)
+	for y, r := range r.Tiles {
+		if y > maxy {
+			maxy = y
+		}
+		for x := range r {
+			if x > maxx {
+				maxx = x
+			}
+		}
+	}
+	return maxx, maxy
 }
