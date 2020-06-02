@@ -28,7 +28,7 @@ type TextWidget struct {
 	maxRows    int
 }
 
-// NewTextWidget returns a new CharacterWindow
+// NewTextWidget returns a new TextWidget
 func NewTextWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect) *TextWidget {
 	return &TextWidget{
 		renderer:   r,
@@ -39,6 +39,8 @@ func NewTextWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect) *TextWi
 	}
 }
 
+// AddRow adds a new line of text.
+// If number of lines > max lines, the oldest will be removed.
 func (w *TextWidget) AddRow(row string) {
 	w.textRows = append(w.textRows, row)
 	if len(w.textRows) > w.maxRows {

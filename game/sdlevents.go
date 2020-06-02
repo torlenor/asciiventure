@@ -21,19 +21,19 @@ func (g *Game) handleSDLEvents() {
 					g.loadRoomsFromDirectory("./assets/rooms")
 					continue
 				case sdl.K_UP:
-					g.renderer.OriginY++
+					g.renderer.OriginY += 2
 					g.preRenderRoom()
 					continue
 				case sdl.K_DOWN:
-					g.renderer.OriginY--
+					g.renderer.OriginY -= 2
 					g.preRenderRoom()
 					continue
 				case sdl.K_LEFT:
-					g.renderer.OriginX++
+					g.renderer.OriginX += 2
 					g.preRenderRoom()
 					continue
 				case sdl.K_RIGHT:
-					g.renderer.OriginX--
+					g.renderer.OriginX -= 2
 					g.preRenderRoom()
 					continue
 				}
@@ -70,21 +70,23 @@ func (g *Game) handleSDLEvents() {
 					case "+":
 						g.renderScale += 0.1
 						g.preRenderRoom()
+						g.focusPlayer()
 						continue
 					case "-":
 						g.renderScale -= 0.1
 						g.preRenderRoom()
+						g.focusPlayer()
 						continue
 					}
 				}
 			}
 		case *sdl.MouseMotionEvent:
-			g.updateMouse(t.X, t.Y)
+			g.updateMouseTile(t.X, t.Y)
 		case *sdl.MouseButtonEvent:
 			if t.State == sdl.PRESSED {
 				switch t.Button {
 				case sdl.BUTTON_LEFT:
-					g.setPlayerTargetPosition(g.mouseTileX, g.mouseTileY)
+					g.setTargetPosition(g.mouseTileX, g.mouseTileY)
 				case sdl.BUTTON_RIGHT:
 				}
 			}

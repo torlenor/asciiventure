@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"time"
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
@@ -29,7 +28,7 @@ const (
 	latticeDX = 19
 	latticeDY = 32
 
-	playerViewRange = 10
+	playerViewRange = 20
 )
 
 type gameState int
@@ -69,7 +68,8 @@ type Game struct {
 	mouseTileX int32
 	mouseTileY int32
 
-	markedPath []components.Position
+	markedPath   []components.Position
+	movementPath []components.Position
 
 	player   *entity.Entity
 	entities []*entity.Entity
@@ -85,7 +85,7 @@ type Game struct {
 
 // Setup should be called first after creating an instance of Game.
 func (g *Game) Setup() {
-	g.renderScale = 1.0
+	g.renderScale = 0.8
 
 	g.setupWindow()
 	g.setupRenderer()
@@ -108,41 +108,6 @@ func (g *Game) Shutdown() {
 	g.window.Destroy()
 	sdl.Quit()
 	ttf.Quit()
-}
-
-// GameLoop is a blocking function actually running the game.
-func (g *Game) GameLoop() {
-	g.createGlyphTexture()
-	g.createPlayer()
-	g.loadRoomsFromDirectory("./assets/rooms")
-	g.selectRoom(1)
-
-	ticker := time.NewTicker(time.Second / 15)
-
-	g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
-	g.updateCharacterWindow()
-	g.logWindow.SetText([]string{"Welcome to <Epic Name Here>.", "A small cat takes a stroll and ends up in an epic adventure."})
-
-	for !g.quit {
-		start := time.Now()
-		g.handleSDLEvents()
-		if g.gameState != gameOver {
-			g.timestep()
-		}
-		gameLogicUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-
-		start = time.Now()
-		g.draw()
-		drawUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-		start = time.Now()
-		<-ticker.C
-		spareMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-		if false {
-			fmt.Printf("Game logic duration: %.2f ms, draw duration: %.2f ms, total: %.2f ms, spare: %.2f ms\n", gameLogicUpdateMs, drawUpdateMs, gameLogicUpdateMs+drawUpdateMs, spareMs)
-		}
-	}
-
-	ticker.Stop()
 }
 
 func (g *Game) createGlyphTexture() {
@@ -195,7 +160,7 @@ func (g *Game) createEnemy(name string, gl components.Glyph, p components.Positi
 
 func (g *Game) occupied(x, y int32) bool {
 	for _, e := range g.entities {
-		if e.Position.X == x && e.Position.Y == y {
+		if e.Position.X == x && e.Position.Y == y && e.Blocks && g.currentRoom.Seen(x, y) && g.currentRoom.Visible(x, y) {
 			return true
 		}
 	}
@@ -204,7 +169,7 @@ func (g *Game) occupied(x, y int32) bool {
 
 func (g *Game) createEnemyEntities() {
 	maxx, maxy := g.currentRoom.Dimensions()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		x := int32(rand.Intn(int(maxx)))
 		y := int32(rand.Intn(int(maxy)))
 		if g.occupied(x, y) || !g.currentRoom.Empty(x, y) {
@@ -236,7 +201,8 @@ func (g *Game) renderEntities() {
 	g.renderer.RenderGlyph(g.player.Glyph, g.player.Position.X, g.player.Position.Y)
 }
 
-func (g *Game) setPlayerTargetPosition(x, y int32) {
+func (g *Game) setTargetPosition(x, y int32) {
+	g.movementPath = g.markedPath
 	g.player.TargetPosition = components.Position{X: x, Y: y}
 }
 

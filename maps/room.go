@@ -113,8 +113,14 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 	return room, nil
 }
 
-// Empty returns true if the specified coordinates of the room are empty.
+// Empty returns true if the specified coordinates of the room are empty
+// and inside the map boundaries.
 func (r *Room) Empty(x, y int32) bool {
+	maxx, maxy := r.Dimensions()
+	if x > maxx || x < 0 || y > maxy || y < 0 {
+		return false
+	}
+
 	if y, ok := r.Tiles[y]; ok {
 		if x, ok := y[x]; ok {
 			if x.Char != emptyChar {
@@ -125,8 +131,14 @@ func (r *Room) Empty(x, y int32) bool {
 	return true
 }
 
+// Visible returns true if (x,y) is visible by the player.
 func (r *Room) Visible(x, y int32) bool {
 	return r.Tiles[y][x].Visible
+}
+
+// Seen returns true if (x,y) was seen by the player.
+func (r *Room) Seen(x, y int32) bool {
+	return r.Tiles[y][x].Seen
 }
 
 // Dimensions returns the max width and height of the room.
@@ -144,4 +156,26 @@ func (r *Room) Dimensions() (int32, int32) {
 		}
 	}
 	return maxx, maxy
+}
+
+func (r *Room) InDimensions(p components.Position) bool {
+	maxx, maxy := r.Dimensions()
+	if p.X > maxx || p.X < 0 || p.Y > maxy || p.Y < 0 {
+		return false
+	}
+	return true
+}
+
+// Neighbors returns the empty neighbors for a given point
+func (r *Room) Neighbors(p components.Position) []components.Position {
+	var neighbors []components.Position
+	for x := int32(-1); x <= 1; x++ {
+		for y := int32(-1); y <= 1; y++ {
+			if r.Empty(p.X+x, p.Y+y) && r.Seen(p.X+x, p.Y+y) {
+				neighbors = append(neighbors, components.Position{X: p.X + x, Y: p.Y + y})
+			}
+		}
+	}
+
+	return neighbors
 }

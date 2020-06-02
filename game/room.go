@@ -45,8 +45,6 @@ func (g *Game) selectRoom(r int) {
 
 	g.currentRoom = g.loadedRooms[r]
 
-	g.preRenderRoom()
-
 	g.currentRoom.ClearSeen()
 	g.entities = []*entity.Entity{}
 	// TODO: Should not create a new player when this is going to be used as map transition
@@ -57,6 +55,11 @@ func (g *Game) selectRoom(r int) {
 	g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
+	g.time = 0
+
+	g.focusPlayer()
+	g.preRenderRoom()
+	g.updateCharacterWindow()
 }
 
 func (g *Game) preRenderRoom() {
@@ -74,4 +77,9 @@ func (g *Game) preRenderRoom() {
 	g.currentRoom.Render(g.renderer, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderer.Present()
 	g.renderer.SetRenderTarget(nil)
+}
+
+func (g *Game) focusPlayer() {
+	g.renderer.OriginX = -g.player.Position.X + int32(screenWidth/latticeDX/2/g.renderScale)
+	g.renderer.OriginY = -g.player.Position.Y + int32((screenHeight+screenHeight/6)/latticeDY/2/g.renderScale)
 }
