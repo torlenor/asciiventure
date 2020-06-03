@@ -22,7 +22,7 @@ func (g *Game) GameLoop() {
 		start = time.Now()
 		<-ticker.C
 		spareMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-		if true {
+		if false {
 			fmt.Printf("Game logic duration: %.2f ms, draw duration: %.2f ms, total: %.2f ms, spare: %.2f ms\n", gameLogicUpdateMs, drawUpdateMs, gameLogicUpdateMs+drawUpdateMs, spareMs)
 		}
 	}

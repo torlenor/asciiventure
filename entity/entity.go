@@ -22,6 +22,9 @@ type Entity struct {
 	// Visibility
 	visibilityRange int
 	FoV             fov.FoVMap
+
+	// AI
+	AttackRange int
 }
 
 // NewEntity creates a new unique entity.

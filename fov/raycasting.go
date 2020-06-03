@@ -6,6 +6,7 @@ import (
 	"github.com/torlenor/asciiventure/components"
 )
 
+// OpaqueGraph is a interface describing a graph which provides a Opaque function.
 type OpaqueGraph interface {
 	Opaque(p components.Position) bool
 }
@@ -13,6 +14,7 @@ type OpaqueGraph interface {
 // UpdateFoV updates the map with current field of view data based on the provided entity postion.
 // viewRange is the number of tiles the entity can see.
 func UpdateFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, entityPosition components.Position) {
+	fovMap.ClearVisible()
 	for i := 0; i < 360; i++ {
 		uvecX := math.Cos(float64(i) * 0.01745)
 		uvecY := math.Sin(float64(i) * 0.01745)
@@ -28,10 +30,10 @@ func doFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, x float64, y float64, en
 	for i := 0; i < viewRange; i++ {
 		ix := int(ox + 0.5)
 		iy := int(oy + 0.5)
-		fovMap.UpdateSeen(components.Position{ix, iy}, true)
-		fovMap.UpdateVisible(components.Position{ix, iy}, true)
-		if r.Opaque(components.Position{ix, iy}) {
-			// return
+		fovMap.UpdateSeen(components.Position{X: ix, Y: iy}, true)
+		fovMap.UpdateVisible(components.Position{X: ix, Y: iy}, true)
+		if r.Opaque(components.Position{X: ix, Y: iy}) {
+			return
 		}
 		ox += float64(x)
 		oy += float64(y)

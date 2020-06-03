@@ -139,6 +139,7 @@ func (g *Game) createMouse(p components.Position) *entity.Entity {
 		gl.Color = components.ColorRGB{R: 200, G: 200, B: 200}
 		e := g.createEnemy("Mouse", gl, p)
 		e.Combat = &components.Combat{MaxHP: 2, HP: 2, Power: 1, Defense: 0}
+		e.AttackRange = 4
 		return e
 	}
 	log.Printf("Unable to add mouse entity")
@@ -150,6 +151,7 @@ func (g *Game) createDog(p components.Position) *entity.Entity {
 		gl.Color = components.ColorRGB{R: 255, G: 0, B: 0}
 		e := g.createEnemy("Dog", gl, p)
 		e.Combat = &components.Combat{MaxHP: 10, HP: 10, Power: 5, Defense: 2}
+		e.AttackRange = 8
 		return e
 	}
 	log.Printf("Unable to add dog entity")

@@ -48,21 +48,33 @@ func (g *Game) updatePositions(state gameState) {
 			continue
 		}
 		var path []components.Position
+		var newPosition components.Position
 		if e == g.player {
 			path = g.movementPath
+			if len(g.movementPath) > 0 {
+				newPosition = g.movementPath[0]
+			} else {
+				newPosition = g.player.TargetPosition
+			}
 		} else {
-			path = pathfinding.DetermineStraightLinePath(e.Position, g.player.Position)
+			if g.currentGameMap.Distance(g.player.Position, e.Position) <= float64(e.AttackRange) {
+				path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, g.player.Position)
+			}
+			if len(path) > 0 {
+				newPosition = path[0]
+			}
 		}
-		if len(path) == 0 {
+		if newPosition.Equal(e.Position) {
 			continue
 		}
-		newP := path[0]
-		roomEmpty := g.currentGameMap.Empty(newP.X, newP.Y)
-		blockingE, blocked := g.blocked(newP.X, newP.Y)
+		roomEmpty := g.currentGameMap.Empty(newPosition.X, newPosition.Y)
+		blockingE, blocked := g.blocked(newPosition.X, newPosition.Y)
 		if roomEmpty && !blocked {
-			e.MoveTo(newP)
+			e.MoveTo(newPosition)
 			if e == g.player {
-				g.movementPath = g.movementPath[1:]
+				if len(g.movementPath) > 0 {
+					g.movementPath = g.movementPath[1:]
+				}
 			}
 		} else if blocked {
 			if e.Combat != nil && blockingE.Combat != nil && !(e != g.player && blockingE != g.player) {

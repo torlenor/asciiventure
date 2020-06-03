@@ -16,10 +16,11 @@ const (
 	emptyChar = "·"
 )
 
+// GameMap holds the data of a game map
 type GameMap struct {
-	T          *assets.GlyphTexture
-	Tiles      map[int]map[int]Tile
-	Colors     map[int]map[int]components.ColorRGB
+	T     *assets.GlyphTexture
+	Tiles map[int]map[int]Tile
+
 	SpawnPoint components.Position
 
 	notSeenGlyph components.Glyph
@@ -42,13 +43,11 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 		return GameMap{}, fmt.Errorf("Not a valid room description")
 	}
 	room := GameMap{
-		Tiles:  make(map[int]map[int]Tile),
-		Colors: make(map[int]map[int]components.ColorRGB),
+		Tiles: make(map[int]map[int]Tile),
 	}
 	spawnPointSet := false
 	for y, l := range lines {
 		room.Tiles[int(y)] = make(map[int]Tile)
-		room.Colors[int(y)] = make(map[int]components.ColorRGB)
 		cntX := -1
 		for _, r := range l {
 			cntX++
@@ -64,7 +63,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				c = " "
 			}
 
-			room.Colors[int(y)][int(x)] = components.ColorRGB{
+			foregroundColor := components.ColorRGB{
 				R: 160,
 				G: 255,
 				B: 160,
@@ -72,7 +71,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 
 			if c == " " {
 				c = "·"
-				room.Colors[int(y)][int(x)] = components.ColorRGB{
+				foregroundColor = components.ColorRGB{
 					R: 120,
 					G: 120,
 					B: 120,
@@ -82,7 +81,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 			if c == "#" {
 				opaque = true
 			}
-			room.Tiles[int(y)][int(x)] = Tile{Char: c, Opaque: opaque}
+			room.Tiles[int(y)][int(x)] = Tile{Char: c, Opaque: opaque, ForegroundColor: foregroundColor}
 		}
 	}
 
@@ -123,6 +122,7 @@ func (r *GameMap) Empty(x, y int) bool {
 	return true
 }
 
+// Opaque returns true if the specified position is not transparent.
 func (r *GameMap) Opaque(p components.Position) bool {
 	return r.Tiles[p.Y][p.X].Opaque
 }
@@ -144,6 +144,7 @@ func (r *GameMap) Dimensions() (int, int) {
 	return maxx, maxy
 }
 
+// InDimensions returns true if the specified position is inside the map dimensions
 func (r *GameMap) InDimensions(p components.Position) bool {
 	maxx, maxy := r.Dimensions()
 	if p.X > maxx || p.X < 0 || p.Y > maxy || p.Y < 0 {

@@ -2,6 +2,8 @@ package game
 
 import (
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/torlenor/asciiventure/renderers"
@@ -47,11 +49,14 @@ func (g *Game) setupRenderer() {
 }
 
 func (g *Game) setupGame() {
+	rand.Seed(time.Now().UnixNano())
 	g.createGlyphTexture()
 	g.createPlayer()
 	g.loadedGameMaps = []*gamemap.GameMap{}
-	randomMap := gamemap.NewRandomMap(10, 4, 10, 100, 100, g.glyphTexture)
-	g.loadedGameMaps = append(g.loadedGameMaps, &randomMap)
+	for i := 0; i < 3; i++ {
+		randomMap := gamemap.NewRandomMap(10, 4, 10, 100, 40, g.glyphTexture)
+		g.loadedGameMaps = append(g.loadedGameMaps, &randomMap)
+	}
 	g.loadGameMapsFromDirectory("./assets/rooms")
 	g.selectGameMap(1)
 

@@ -15,7 +15,7 @@ func (r *GameMap) Render(renderer *renderers.Renderer, playerFoV fov.FoVMap, off
 			if g, ok := r.T.Get(t.Char); ok {
 				p := components.Position{X: x, Y: y}
 				if playerFoV.Visible(p) {
-					g.Color = r.Colors[y][x]
+					g.Color = t.ForegroundColor
 				} else if playerFoV.Seen(p) {
 					g.Color = components.ColorRGB{R: 50, G: 100, B: 50}
 				} else {

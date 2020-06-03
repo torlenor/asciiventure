@@ -50,3 +50,13 @@ func (m FoVMap) ClearSeen() {
 		}
 	}
 }
+
+// ClearVisible removes the seen state on all tiles of the room.
+func (m FoVMap) ClearVisible() {
+	for i, y := range m {
+		for j, t := range y {
+			t.Visible = false
+			m[i][j] = t
+		}
+	}
+}

@@ -3,6 +3,7 @@ package game
 import (
 	"strconv"
 
+	"github.com/torlenor/asciiventure/components"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -13,12 +14,23 @@ func (g *Game) handleSDLEvents() {
 			g.quit = true
 		case *sdl.KeyboardEvent:
 
-			// upperCase := false
+			// shift := false
+			// ctrl := false
 			alt := false
 
 			switch t.Keysym.Mod {
 			case sdl.KMOD_LSHIFT:
-				// upperCase = true
+				fallthrough
+			case sdl.KMOD_RSHIFT:
+				fallthrough
+			case sdl.KMOD_SHIFT:
+				// shift = true
+			case sdl.KMOD_LCTRL:
+				fallthrough
+			case sdl.KMOD_RCTRL:
+				fallthrough
+			case sdl.KMOD_CTRL:
+				// ctrl = true
 			case sdl.KMOD_RALT:
 				fallthrough
 			case sdl.KMOD_LALT:
@@ -39,24 +51,40 @@ func (g *Game) handleSDLEvents() {
 					if alt {
 						g.renderer.OriginY += 2
 						g.preRenderGameMap()
+					} else {
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.Y = g.player.Position.Y - 1
+						g.nextStep = true
 					}
 					continue
 				case sdl.K_DOWN:
 					if alt {
 						g.renderer.OriginY -= 2
 						g.preRenderGameMap()
+					} else {
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.Y = g.player.Position.Y + 1
+						g.nextStep = true
 					}
 					continue
 				case sdl.K_LEFT:
 					if alt {
 						g.renderer.OriginX += 2
 						g.preRenderGameMap()
+					} else {
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X - 1
+						g.nextStep = true
 					}
 					continue
 				case sdl.K_RIGHT:
 					if alt {
 						g.renderer.OriginX -= 2
 						g.preRenderGameMap()
+					} else {
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X + 1
+						g.nextStep = true
 					}
 					continue
 				}
@@ -88,6 +116,53 @@ func (g *Game) handleSDLEvents() {
 						g.renderScale -= 0.1
 						g.preRenderGameMap()
 						g.focusPlayer()
+						continue
+					// y	k	u
+					// h		l
+					// b	j	n
+					case "y":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X - 1
+						g.player.TargetPosition.Y = g.player.Position.Y - 1
+						g.nextStep = true
+						continue
+					case "k":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.Y = g.player.Position.Y - 1
+						g.nextStep = true
+						continue
+					case "u":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X + 1
+						g.player.TargetPosition.Y = g.player.Position.Y - 1
+						g.nextStep = true
+						continue
+					case "h":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X - 1
+						g.nextStep = true
+						continue
+					case "l":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X + 1
+						g.nextStep = true
+						continue
+					case "b":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X - 1
+						g.player.TargetPosition.Y = g.player.Position.Y + 1
+						g.nextStep = true
+						continue
+					case "j":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.Y = g.player.Position.Y + 1
+						g.nextStep = true
+						continue
+					case "n":
+						g.movementPath = []components.Position{}
+						g.player.TargetPosition.X = g.player.Position.X + 1
+						g.player.TargetPosition.Y = g.player.Position.Y + 1
+						g.nextStep = true
 						continue
 					}
 				}
