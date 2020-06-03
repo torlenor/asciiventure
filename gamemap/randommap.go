@@ -18,8 +18,7 @@ func NewRandomMap(maxRooms int, roomMinSize, roomMaxSize, mapWidth, mapHeight in
 			gameMap.Tiles[int(y)] = make(map[int]Tile)
 		}
 		for x := int(0); x < mapWidth; x++ {
-			foregroundColor := components.ColorRGB{
-				R: 160, G: 160, B: 160}
+			foregroundColor := foregroundColorWallVisible
 			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "#", Opaque: true, ForegroundColor: foregroundColor}
 		}
 	}
@@ -65,7 +64,7 @@ Loop:
 	gameMap.notSeenGlyph, _ = gameMap.T.Get("#")
 	gameMap.notSeenGlyph.Color = components.ColorRGB{
 		R: 20,
-		G: 50,
+		G: 20,
 		B: 20,
 	}
 
@@ -78,8 +77,7 @@ func createRoom(gameMap *GameMap, room rect) {
 			gameMap.Tiles[int(y)] = make(map[int]Tile)
 		}
 		for x := room.x1 + 1; x < room.x2; x++ {
-			foregroundColor := components.ColorRGB{
-				R: 60, G: 60, B: 60}
+			foregroundColor := foregroundColorEmptyDot
 			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
 		}
 	}
@@ -87,16 +85,14 @@ func createRoom(gameMap *GameMap, room rect) {
 
 func createHTunnel(gameMap *GameMap, x1, x2, y int) {
 	for x := utils.MinInt(x1, x2); x < utils.MaxInt(x1, x2)+1; x++ {
-		foregroundColor := components.ColorRGB{
-			R: 60, G: 60, B: 60}
+		foregroundColor := foregroundColorEmptyDot
 		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
 	}
 }
 
 func createVTunnel(gameMap *GameMap, y1, y2, x int) {
 	for y := utils.MinInt(y1, y2); y < utils.MaxInt(y1, y2)+1; y++ {
-		foregroundColor := components.ColorRGB{
-			R: 60, G: 60, B: 60}
+		foregroundColor := foregroundColorEmptyDot
 		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
 	}
 }

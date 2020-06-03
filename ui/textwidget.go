@@ -64,7 +64,7 @@ func (w *TextWidget) createTexure() {
 	if len(w.textRows) == 0 {
 		return
 	}
-	surface, err := w.font.RenderUTF8BlendedWrapped(fmt.Sprintf("%s", strings.Join(w.textRows, "\n")), sdl.Color{R: 0, G: 255, B: 0, A: 255}, w.wrapLength) // we only want manual wrapping and therefore set the wrapLength kinda large
+	surface, err := w.font.RenderUTF8BlendedWrapped(fmt.Sprintf("%s", strings.Join(w.textRows, "\n")), sdl.Color{R: 255, G: 255, B: 255, A: 255}, w.wrapLength) // we only want manual wrapping and therefore set the wrapLength kinda large
 	if err != nil {
 		log.Printf("Error rendering text: %s", err)
 		return
@@ -98,7 +98,7 @@ func (w *TextWidget) Render() {
 	r.SetDrawColor(0, 0, 0, 255)
 	r.SetClipRect(w.dst)
 	r.FillRect(w.dst)
-	r.SetDrawColor(100, 255, 100, 255)
+	r.SetDrawColor(255, 255, 255, 255)
 	r.DrawRect(w.dst)
 	r.SetDrawColor(cr, cg, cb, ca)
 	r.SetDrawBlendMode(bm)

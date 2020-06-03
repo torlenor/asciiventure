@@ -17,9 +17,10 @@ func (r *GameMap) Render(renderer *renderers.Renderer, playerFoV fov.FoVMap, off
 				if playerFoV.Visible(p) {
 					g.Color = t.ForegroundColor
 				} else if playerFoV.Seen(p) {
-					g.Color = components.ColorRGB{R: 50, G: 100, B: 50}
+					g.Color = foregroundColorNotVisible
 				} else {
-					g = r.notSeenGlyph
+					// g = r.notSeenGlyph
+					continue
 				}
 
 				renderer.RenderGlyph(g, x, y)

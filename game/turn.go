@@ -57,8 +57,10 @@ func (g *Game) updatePositions(state gameState) {
 				newPosition = g.player.TargetPosition
 			}
 		} else {
-			if g.currentGameMap.Distance(g.player.Position, e.Position) <= float64(e.AttackRange) {
+			if g.currentGameMap.Distance(g.player.Position, e.InitialPosition) <= float64(e.AttackRange) && g.currentGameMap.Distance(e.Position, e.InitialPosition) <= float64(e.AttackRangeUntil) {
 				path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, g.player.Position)
+			} else {
+				path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, e.InitialPosition)
 			}
 			if len(path) > 0 {
 				newPosition = path[0]

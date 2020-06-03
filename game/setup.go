@@ -54,7 +54,7 @@ func (g *Game) setupGame() {
 	g.createPlayer()
 	g.loadedGameMaps = []*gamemap.GameMap{}
 	for i := 0; i < 3; i++ {
-		randomMap := gamemap.NewRandomMap(10, 4, 10, 100, 40, g.glyphTexture)
+		randomMap := gamemap.NewRandomMap(10, 6, 20, 100, 60, g.glyphTexture)
 		g.loadedGameMaps = append(g.loadedGameMaps, &randomMap)
 	}
 	g.loadGameMapsFromDirectory("./assets/rooms")

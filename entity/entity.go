@@ -24,17 +24,20 @@ type Entity struct {
 	FoV             fov.FoVMap
 
 	// AI
-	AttackRange int
+	AttackRange      int
+	InitialPosition  components.Position
+	AttackRangeUntil int
 }
 
 // NewEntity creates a new unique entity.
 func NewEntity(name string, glyph components.Glyph, initPosition components.Position, blocks bool) *Entity {
 	return &Entity{
-		Name:     name,
-		Glyph:    glyph,
-		Position: initPosition,
-		Blocks:   blocks,
-		FoV:      make(fov.FoVMap),
+		Name:            name,
+		Glyph:           glyph,
+		Position:        initPosition,
+		Blocks:          blocks,
+		FoV:             make(fov.FoVMap),
+		InitialPosition: initPosition,
 	}
 }
 
