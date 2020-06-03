@@ -15,7 +15,7 @@ func calcCost(current components.Position, next components.Position) float64 {
 }
 
 func DetermineAstarPath(graph Graph, obstacles Obstacles, start components.Position, goal components.Position) []components.Position {
-	if !graph.InDimensions(goal) {
+	if !graph.InDimensions(goal) || graph.Opaque(goal) {
 		return []components.Position{}
 	}
 

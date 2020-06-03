@@ -19,7 +19,6 @@ func (g *Game) loadGameMapsFromDirectory(dir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g.loadedGameMaps = []*gamemap.GameMap{}
 	for _, f := range files {
 		if !f.IsDir() {
 			ext := path.Ext(f.Name())
@@ -74,7 +73,7 @@ func (g *Game) selectGameMap(r int) {
 func (g *Game) preRenderGameMap() {
 	var err error
 	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
-		sdl.TEXTUREACCESS_TARGET, int32(screenWidth/g.renderScale), int32(screenHeight/g.renderScale))
+		sdl.TEXTUREACCESS_TARGET, int(screenWidth/g.renderScale), int(screenHeight/g.renderScale))
 	if err != nil {
 		log.Printf("Error creating texture: %s", err)
 	}
@@ -89,6 +88,6 @@ func (g *Game) preRenderGameMap() {
 }
 
 func (g *Game) focusPlayer() {
-	g.renderer.OriginX = -g.player.Position.X + int32(screenWidth/latticeDX/2/g.renderScale)
-	g.renderer.OriginY = -g.player.Position.Y + int32((screenHeight+screenHeight/6)/latticeDY/2/g.renderScale)
+	g.renderer.OriginX = -g.player.Position.X + int(screenWidth/latticeDX/2/g.renderScale)
+	g.renderer.OriginY = -g.player.Position.Y + int((screenHeight+screenHeight/6)/latticeDY/2/g.renderScale)
 }

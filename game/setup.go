@@ -3,6 +3,7 @@ package game
 import (
 	"log"
 
+	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -42,12 +43,15 @@ func (g *Game) setupRenderer() {
 	g.renderer.GlyphWidth = latticeDX
 	g.renderer.GlyphHeight = latticeDY
 
-	g.renderer.OriginY = characterWindowRect.H/latticeDY + 1
+	g.renderer.OriginY = int(characterWindowRect.H/latticeDY) + 1
 }
 
 func (g *Game) setupGame() {
 	g.createGlyphTexture()
 	g.createPlayer()
+	g.loadedGameMaps = []*gamemap.GameMap{}
+	randomMap := gamemap.NewRandomMap(10, 4, 10, 100, 100, g.glyphTexture)
+	g.loadedGameMaps = append(g.loadedGameMaps, &randomMap)
 	g.loadGameMapsFromDirectory("./assets/rooms")
 	g.selectGameMap(1)
 

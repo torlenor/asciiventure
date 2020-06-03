@@ -7,7 +7,7 @@ import (
 )
 
 type OpaqueGraph interface {
-	IsOpaque(p components.Position) bool
+	Opaque(p components.Position) bool
 }
 
 // UpdateFoV updates the map with current field of view data based on the provided entity postion.
@@ -26,12 +26,12 @@ func doFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, x float64, y float64, en
 	ox := float64(entityPosition.X)
 	oy := float64(entityPosition.Y)
 	for i := 0; i < viewRange; i++ {
-		ix := int32(ox + 0.5)
-		iy := int32(oy + 0.5)
+		ix := int(ox + 0.5)
+		iy := int(oy + 0.5)
 		fovMap.UpdateSeen(components.Position{ix, iy}, true)
 		fovMap.UpdateVisible(components.Position{ix, iy}, true)
-		if r.IsOpaque(components.Position{ix, iy}) {
-			return
+		if r.Opaque(components.Position{ix, iy}) {
+			// return
 		}
 		ox += float64(x)
 		oy += float64(y)

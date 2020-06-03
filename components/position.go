@@ -4,8 +4,8 @@ import "fmt"
 
 // Position holds the 2d coordinates (x,y).
 type Position struct {
-	X int32
-	Y int32
+	X int
+	Y int
 }
 
 // String returns the stringified position in the format (x,y).

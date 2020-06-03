@@ -13,13 +13,13 @@ import (
 )
 
 type Char struct {
-	X       int32 `json:"x"`
-	Y       int32 `json:"y"`
-	Width   int32 `json:"width"`
-	Height  int32 `json:"height"`
-	OriginX int32 `json:"originX"`
-	OriginY int32 `json:"originY"`
-	Advance int32 `json:"advance"`
+	X       int `json:"x"`
+	Y       int `json:"y"`
+	Width   int `json:"width"`
+	Height  int `json:"height"`
+	OriginX int `json:"originX"`
+	OriginY int `json:"originY"`
+	Advance int `json:"advance"`
 }
 
 type CharSet struct {
@@ -80,7 +80,7 @@ func NewGlyphTexture(renderer *renderers.Renderer, imagePath string, description
 // Returns true as second value if the operation was successfull.
 func (g *GlyphTexture) Get(c string) (components.Glyph, bool) {
 	if a, ok := g.glyphCharSet.Characters[c]; ok {
-		return components.Glyph{T: g.t, Src: &sdl.Rect{X: a.X, Y: a.Y, W: a.Width, H: a.Height},
+		return components.Glyph{T: g.t, Src: &sdl.Rect{X: int32(a.X), Y: int32(a.Y), W: int32(a.Width), H: int32(a.Height)},
 			OffsetX: a.OriginX, OffsetY: a.OriginY,
 			Width: a.Width, Height: a.Height,
 			Color: components.ColorRGB{R: 255, G: 255, B: 255}}, true

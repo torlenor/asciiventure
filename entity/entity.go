@@ -36,7 +36,7 @@ func NewEntity(name string, glyph components.Glyph, initPosition components.Posi
 }
 
 // Move moves the entity by (dy,dy).
-func (e *Entity) Move(dx, dy int32) {
+func (e *Entity) Move(dx, dy int) {
 	e.Position.X += dx
 	e.Position.Y += dy
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // Render renders the current state of the room to the provided renderer.
-func (r *GameMap) Render(renderer *renderers.Renderer, playerFoV fov.FoVMap, offsetX, offsetY int32) {
+func (r *GameMap) Render(renderer *renderers.Renderer, playerFoV fov.FoVMap, offsetX, offsetY int) {
 	for y, l := range r.Tiles {
 		for x, t := range l {
 			if g, ok := r.T.Get(t.Char); ok {

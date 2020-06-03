@@ -8,7 +8,7 @@ import (
 	"github.com/torlenor/asciiventure/pathfinding"
 )
 
-func (g *Game) blocked(x, y int32) (*entity.Entity, bool) {
+func (g *Game) blocked(x, y int) (*entity.Entity, bool) {
 	for _, e := range g.entities {
 		if e.Blocks == true && e.Position.X == x && e.Position.Y == y && g.player.FoV.Seen(components.Position{X: x, Y: y}) {
 			return e, true

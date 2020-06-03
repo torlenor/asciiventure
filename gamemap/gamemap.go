@@ -18,8 +18,8 @@ const (
 
 type GameMap struct {
 	T          *assets.GlyphTexture
-	Tiles      map[int32]map[int32]Tile
-	Colors     map[int32]map[int32]components.ColorRGB
+	Tiles      map[int]map[int]Tile
+	Colors     map[int]map[int]components.ColorRGB
 	SpawnPoint components.Position
 
 	notSeenGlyph components.Glyph
@@ -42,29 +42,29 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 		return GameMap{}, fmt.Errorf("Not a valid room description")
 	}
 	room := GameMap{
-		Tiles:  make(map[int32]map[int32]Tile),
-		Colors: make(map[int32]map[int32]components.ColorRGB),
+		Tiles:  make(map[int]map[int]Tile),
+		Colors: make(map[int]map[int]components.ColorRGB),
 	}
 	spawnPointSet := false
 	for y, l := range lines {
-		room.Tiles[int32(y)] = make(map[int32]Tile)
-		room.Colors[int32(y)] = make(map[int32]components.ColorRGB)
+		room.Tiles[int(y)] = make(map[int]Tile)
+		room.Colors[int(y)] = make(map[int]components.ColorRGB)
 		cntX := -1
 		for _, r := range l {
 			cntX++
-			x := int32(cntX)
+			x := int(cntX)
 			c := string(r)
 			if c == "@" {
 				if spawnPointSet {
 					log.Printf("Warning: Player spawn point defined more than once")
 					c = " "
 				}
-				room.SpawnPoint = components.Position{X: int32(x), Y: int32(y)}
+				room.SpawnPoint = components.Position{X: int(x), Y: int(y)}
 				spawnPointSet = true
 				c = " "
 			}
 
-			room.Colors[int32(y)][int32(x)] = components.ColorRGB{
+			room.Colors[int(y)][int(x)] = components.ColorRGB{
 				R: 160,
 				G: 255,
 				B: 160,
@@ -72,7 +72,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 
 			if c == " " {
 				c = "·"
-				room.Colors[int32(y)][int32(x)] = components.ColorRGB{
+				room.Colors[int(y)][int(x)] = components.ColorRGB{
 					R: 120,
 					G: 120,
 					B: 120,
@@ -82,7 +82,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 			if c == "#" {
 				opaque = true
 			}
-			room.Tiles[int32(y)][int32(x)] = Tile{Char: c, Opaque: opaque}
+			room.Tiles[int(y)][int(x)] = Tile{Char: c, Opaque: opaque}
 		}
 	}
 
@@ -107,7 +107,7 @@ func (r GameMap) Distance(a components.Position, b components.Position) float64 
 
 // Empty returns true if the specified coordinates of the room are empty
 // and inside the map boundaries.
-func (r *GameMap) Empty(x, y int32) bool {
+func (r *GameMap) Empty(x, y int) bool {
 	maxx, maxy := r.Dimensions()
 	if x > maxx || x < 0 || y > maxy || y < 0 {
 		return false
@@ -123,14 +123,14 @@ func (r *GameMap) Empty(x, y int32) bool {
 	return true
 }
 
-func (r *GameMap) IsOpaque(p components.Position) bool {
+func (r *GameMap) Opaque(p components.Position) bool {
 	return r.Tiles[p.Y][p.X].Opaque
 }
 
 // Dimensions returns the max width and height of the room.
-func (r *GameMap) Dimensions() (int32, int32) {
-	maxx := int32(0)
-	maxy := int32(0)
+func (r *GameMap) Dimensions() (int, int) {
+	maxx := int(0)
+	maxy := int(0)
 	for y, r := range r.Tiles {
 		if y > maxy {
 			maxy = y
@@ -155,8 +155,8 @@ func (r *GameMap) InDimensions(p components.Position) bool {
 // Neighbors returns the empty neighbors for a given point
 func (r *GameMap) Neighbors(p components.Position) []components.Position {
 	var neighbors []components.Position
-	for x := int32(-1); x <= 1; x++ {
-		for y := int32(-1); y <= 1; y++ {
+	for x := int(-1); x <= 1; x++ {
+		for y := int(-1); y <= 1; y++ {
 			if r.Empty(p.X+x, p.Y+y) {
 				neighbors = append(neighbors, components.Position{X: p.X + x, Y: p.Y + y})
 			}

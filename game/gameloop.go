@@ -11,7 +11,6 @@ func (g *Game) GameLoop() {
 	for !g.quit {
 		start := time.Now()
 		g.handleSDLEvents()
-		g.markedPath = g.determinePathPlayerMouse()
 		if g.gameState != gameOver {
 			g.timestep()
 		}

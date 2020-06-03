@@ -93,7 +93,7 @@ func (g *Game) handleSDLEvents() {
 				}
 			}
 		case *sdl.MouseMotionEvent:
-			g.updateMouseTile(t.X, t.Y)
+			g.updateMouseTile(int(t.X), int(t.Y))
 		case *sdl.MouseButtonEvent:
 			if t.State == sdl.PRESSED {
 				switch t.Button {

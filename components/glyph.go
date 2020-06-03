@@ -12,9 +12,9 @@ type Glyph struct {
 	Color  ColorRGB
 	Shadow bool
 
-	Width  int32
-	Height int32
+	Width  int
+	Height int
 
-	OffsetX int32
-	OffsetY int32
+	OffsetX int
+	OffsetY int
 }

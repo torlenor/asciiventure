@@ -6,6 +6,7 @@ import (
 
 // Graph represents the graph on which the pathfinding shall be performed.
 type Graph interface {
+	Opaque(p components.Position) bool
 	InDimensions(p components.Position) bool
 	Neighbors(p components.Position) []components.Position
 	Distance(a components.Position, b components.Position) float64

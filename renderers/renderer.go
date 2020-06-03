@@ -9,11 +9,11 @@ import (
 
 // Renderer is able to render actual elements onto the correct screen positions.
 type Renderer struct {
-	GlyphWidth  int32
-	GlyphHeight int32
+	GlyphWidth  int
+	GlyphHeight int
 
-	OriginX int32
-	OriginY int32
+	OriginX int
+	OriginY int
 
 	renderer *sdl.Renderer
 }
@@ -34,8 +34,8 @@ func (r *Renderer) SetRenderTarget(texture *sdl.Texture) error {
 	return r.renderer.SetRenderTarget(texture)
 }
 
-func (r *Renderer) CreateTexture(format uint32, access int, w int32, h int32) (*sdl.Texture, error) {
-	return r.renderer.CreateTexture(format, access, w, h)
+func (r *Renderer) CreateTexture(format uint, access int, w int, h int) (*sdl.Texture, error) {
+	return r.renderer.CreateTexture(uint32(format), access, int32(w), int32(h))
 }
 
 func (r *Renderer) CreateTextureFromSurface(surface *sdl.Surface) (*sdl.Texture, error) {
@@ -59,13 +59,13 @@ func (r *Renderer) Copy(texture *sdl.Texture, src *sdl.Rect, dst *sdl.Rect) erro
 }
 
 // Render renders a texture starting at the upper left corner of the given character coordinate.
-func (r *Renderer) Render(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h int32) {
+func (r *Renderer) Render(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h int) {
 	r.RenderWithOffset(t, src, cx, cy, w, h, 0, 0)
 }
 
 // RenderWithOffset renders a texture starting at the upper left corner at given character coordinate with the given pixel offset.
-func (r *Renderer) RenderWithOffset(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h, offsetX, offsetY int32) {
-	dst := &sdl.Rect{X: (cx+r.OriginX)*r.GlyphWidth - offsetX, Y: (cy+1+r.OriginY)*r.GlyphHeight - offsetY, W: w, H: h}
+func (r *Renderer) RenderWithOffset(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h, offsetX, offsetY int) {
+	dst := &sdl.Rect{X: int32((cx+r.OriginX)*r.GlyphWidth - offsetX), Y: int32((cy+1+r.OriginY)*r.GlyphHeight - offsetY), W: int32(w), H: int32(h)}
 	err := r.renderer.Copy(t, src, dst)
 	if err != nil {
 		log.Printf("Error in RenderWithOffset: %s", err)
@@ -73,7 +73,7 @@ func (r *Renderer) RenderWithOffset(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h,
 }
 
 // RenderGlyph renders a glyph at the given character coordinate
-func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int32) {
+func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int) {
 	err := g.T.SetColorMod(g.Color.R, g.Color.G, g.Color.B)
 	if err != nil {
 		log.Printf("Error setting Color in RenderGlyph: %s", err)
@@ -82,13 +82,13 @@ func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int32) {
 }
 
 // FillCharCoordinate Draws a rectangle completely filling the given char coordinate
-func (r *Renderer) FillCharCoordinate(cx, cy int32, c components.ColorRGBA) {
+func (r *Renderer) FillCharCoordinate(cx, cy int, c components.ColorRGBA) {
 	cr, cg, cb, ca, _ := r.renderer.GetDrawColor()
 	var bm sdl.BlendMode
 	r.renderer.GetDrawBlendMode(&bm)
 	r.renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.renderer.SetDrawColor(c.R, c.G, c.B, c.A)
-	r.renderer.FillRect(&sdl.Rect{X: (cx + r.OriginX) * r.GlyphWidth, Y: (cy + r.OriginY) * r.GlyphHeight, W: r.GlyphWidth, H: r.GlyphHeight})
+	r.renderer.FillRect(&sdl.Rect{X: int32((cx + r.OriginX) * r.GlyphWidth), Y: int32((cy + r.OriginY) * r.GlyphHeight), W: int32(r.GlyphWidth), H: int32(r.GlyphHeight)})
 	r.renderer.SetDrawColor(cr, cg, cb, ca)
 	r.renderer.SetDrawBlendMode(bm)
 }

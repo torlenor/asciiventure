@@ -7,7 +7,7 @@ type FoV struct {
 	Seen    bool
 }
 
-type FoVMap map[int32]map[int32]FoV
+type FoVMap map[int]map[int]FoV
 
 func NewFovMap() FoVMap {
 	return make(FoVMap)
@@ -29,14 +29,14 @@ func (m FoVMap) Visible(p components.Position) bool {
 
 func (m FoVMap) UpdateSeen(p components.Position, seen bool) {
 	if _, ok := m[p.Y]; !ok {
-		m[p.Y] = make(map[int32]FoV)
+		m[p.Y] = make(map[int]FoV)
 	}
 	m[p.Y][p.X] = FoV{Seen: seen, Visible: m[p.Y][p.X].Visible}
 }
 
 func (m FoVMap) UpdateVisible(p components.Position, visible bool) {
 	if _, ok := m[p.Y]; !ok {
-		m[p.Y] = make(map[int32]FoV)
+		m[p.Y] = make(map[int]FoV)
 	}
 	m[p.Y][p.X] = FoV{Seen: m[p.Y][p.X].Seen, Visible: visible}
 }

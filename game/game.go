@@ -66,16 +66,15 @@ type Game struct {
 	loadedGameMaps []*gamemap.GameMap
 	mapTexture     *sdl.Texture
 
-	mouseTileX int32
-	mouseTileY int32
+	mouseTileX int
+	mouseTileY int
 
-	markedPath   []components.Position
 	movementPath []components.Position
 
 	player   *entity.Entity
 	entities []*entity.Entity
 
-	time uint32
+	time uint
 
 	nextStep  bool
 	gameState gameState
@@ -176,8 +175,8 @@ func (g *Game) Occupied(p components.Position) bool {
 func (g *Game) createEnemyEntities() {
 	maxx, maxy := g.currentGameMap.Dimensions()
 	for i := 0; i < 5; i++ {
-		x := int32(rand.Intn(int(maxx)))
-		y := int32(rand.Intn(int(maxy)))
+		x := int(rand.Intn(int(maxx)))
+		y := int(rand.Intn(int(maxy)))
 		if g.Occupied(components.Position{X: x, Y: y}) || !g.currentGameMap.Empty(x, y) {
 			continue
 		}
@@ -207,8 +206,8 @@ func (g *Game) renderEntities() {
 	g.renderer.RenderGlyph(g.player.Glyph, g.player.Position.X, g.player.Position.Y)
 }
 
-func (g *Game) setTargetPosition(x, y int32) {
-	g.movementPath = g.markedPath
+func (g *Game) setTargetPosition(x, y int) {
+	g.movementPath = g.determinePathPlayerMouse()
 	g.player.TargetPosition = components.Position{X: x, Y: y}
 }
 
@@ -216,7 +215,7 @@ func (g *Game) draw() {
 	g.renderer.SetScale(g.renderScale, g.renderScale)
 	g.renderer.Clear()
 
-	// g.renderer.Copy(g.mapTexture, nil, &sdl.Rect{X: 0, Y: 0, W: int32(screenWidth / g.renderScale), H: int32(screenHeight / g.renderScale)})
+	// g.renderer.Copy(g.mapTexture, nil, &sdl.Rect{X: 0, Y: 0, W: int(screenWidth / g.renderScale), H: int(screenHeight / g.renderScale)})
 	// We are actually rendering it in total again because of FoV updates and some flickering which we encountered when pre-rendering
 	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderEntities()
