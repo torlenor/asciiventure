@@ -2,23 +2,32 @@ package game
 
 import (
 	"container/heap"
-	"math"
 
 	"github.com/torlenor/asciiventure/components"
 )
 
-func determineLatticePathSimple(origin components.Position, target components.Position) []components.Position {
-	current := origin
+type Graph interface {
+	InDimensions(p components.Position) bool
+	Neighbors(p components.Position) []components.Position
+	Distance(a components.Position, b components.Position) float64
+}
+
+type Obstacles interface {
+	Occupied(p components.Position) bool
+}
+
+func determineStraightLinePath(start components.Position, goal components.Position) []components.Position {
+	current := start
 	s := []components.Position{}
-	for target.X != current.X || target.Y != current.Y {
-		if current.X < target.X {
+	for goal.X != current.X || goal.Y != current.Y {
+		if current.X < goal.X {
 			current.X++
-		} else if current.X > target.X {
+		} else if current.X > goal.X {
 			current.X--
 		}
-		if current.Y < target.Y {
+		if current.Y < goal.Y {
 			current.Y++
-		} else if current.Y > target.Y {
+		} else if current.Y > goal.Y {
 			current.Y--
 		}
 		lp := components.Position{X: current.X, Y: current.Y}
@@ -44,33 +53,27 @@ func calcCost(current components.Position, next components.Position) float64 {
 	return 2
 }
 
-func heuristic(a components.Position, b components.Position) float64 {
-	dx := b.X - a.X
-	dy := b.Y - a.Y
-	return math.Sqrt(float64(dx*dx + dy*dy))
-}
-
-func (g *Game) determineLatticePathAstar(origin components.Position, target components.Position) []components.Position {
-	if !g.currentRoom.InDimensions(target) {
+func determineAstarPath(graph Graph, obstacles Obstacles, start components.Position, goal components.Position) []components.Position {
+	if !graph.InDimensions(goal) {
 		return []components.Position{}
 	}
 
 	open := &positionPriorityQueue{}
-	heap.Push(open, &item{value: origin, priority: 0})
+	heap.Push(open, &item{value: start, priority: 0})
 
 	cameFrom := map[components.Position]components.Position{}
-	costSoFar := map[components.Position]float64{origin: 0}
+	costSoFar := map[components.Position]float64{start: 0}
 
 	var current components.Position
 	for open.Len() > 0 {
 		current = heap.Pop(open).(*item).value.(components.Position)
 
-		if current.Equal(target) {
+		if current.Equal(goal) {
 			break
 		}
 
-		for _, next := range g.currentRoom.Neighbors(current) {
-			if g.occupied(next.X, next.Y) && !(next.Equal(target)) {
+		for _, next := range graph.Neighbors(current) {
+			if obstacles.Occupied(next) && !(next.Equal(goal)) {
 				continue
 			}
 
@@ -79,7 +82,7 @@ func (g *Game) determineLatticePathAstar(origin components.Position, target comp
 			c, inCostSoFar := costSoFar[next]
 			if !inCostSoFar || newCost < c {
 				costSoFar[next] = newCost
-				priority := newCost + heuristic(next, target)
+				priority := newCost + graph.Distance(next, goal)
 				open.Push(&item{value: next, priority: priority})
 				cameFrom[next] = current
 			}
@@ -89,18 +92,18 @@ func (g *Game) determineLatticePathAstar(origin components.Position, target comp
 		return []components.Position{}
 	}
 
-	if _, ok := cameFrom[target]; !ok {
+	if _, ok := cameFrom[goal]; !ok {
 		return []components.Position{}
 	}
 
-	current = target
+	current = goal
 	var path []components.Position
-	for current.X != origin.X || current.Y != origin.Y {
+	for current.X != start.X || current.Y != start.Y {
 		path = append(path, current)
 		current = cameFrom[current]
 	}
 
-	// Sort from origin to target
+	// Sort from start to goal
 	for i := len(path)/2 - 1; i >= 0; i-- {
 		opp := len(path) - 1 - i
 		path[i], path[opp] = path[opp], path[i]

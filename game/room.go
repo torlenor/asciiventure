@@ -8,6 +8,7 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
+	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/maps"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -45,14 +46,14 @@ func (g *Game) selectRoom(r int) {
 
 	g.currentRoom = g.loadedRooms[r]
 
-	g.currentRoom.ClearSeen()
+	g.player.FoV.ClearSeen()
 	g.entities = []*entity.Entity{}
 	// TODO: Should not create a new player when this is going to be used as map transition
 	g.createPlayer()
 	g.player.Position = components.Position{X: (g.currentRoom.SpawnPoint.X), Y: g.currentRoom.SpawnPoint.Y}
 	g.player.TargetPosition = g.player.Position
 	g.createEnemyEntities()
-	g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
+	fov.UpdateFoV(g.currentRoom, g.player.FoV, playerViewRange, g.player.Position)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
 	g.time = 0
@@ -74,7 +75,7 @@ func (g *Game) preRenderRoom() {
 	if err != nil {
 		log.Printf("Error setting texture as render target: %s", err)
 	}
-	g.currentRoom.Render(g.renderer, g.renderer.OriginX, g.renderer.OriginY)
+	g.currentRoom.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderer.Present()
 	g.renderer.SetRenderTarget(nil)
 }

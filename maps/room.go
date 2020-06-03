@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/torlenor/asciiventure/assets"
@@ -26,9 +27,7 @@ type Tile struct {
 
 	Char string
 
-	Opaque  bool
-	Visible bool
-	Seen    bool
+	Opaque bool
 }
 
 type Room struct {
@@ -113,6 +112,13 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 	return room, nil
 }
 
+// Distance returns the distance between two points on the map.
+func (r Room) Distance(a components.Position, b components.Position) float64 {
+	dx := b.X - a.X
+	dy := b.Y - a.Y
+	return math.Sqrt(float64(dx*dx + dy*dy))
+}
+
 // Empty returns true if the specified coordinates of the room are empty
 // and inside the map boundaries.
 func (r *Room) Empty(x, y int32) bool {
@@ -131,14 +137,8 @@ func (r *Room) Empty(x, y int32) bool {
 	return true
 }
 
-// Visible returns true if (x,y) is visible by the player.
-func (r *Room) Visible(x, y int32) bool {
-	return r.Tiles[y][x].Visible
-}
-
-// Seen returns true if (x,y) was seen by the player.
-func (r *Room) Seen(x, y int32) bool {
-	return r.Tiles[y][x].Seen
+func (r *Room) IsOpaque(p components.Position) bool {
+	return r.Tiles[p.Y][p.X].Opaque
 }
 
 // Dimensions returns the max width and height of the room.
@@ -171,7 +171,7 @@ func (r *Room) Neighbors(p components.Position) []components.Position {
 	var neighbors []components.Position
 	for x := int32(-1); x <= 1; x++ {
 		for y := int32(-1); y <= 1; y++ {
-			if r.Empty(p.X+x, p.Y+y) && r.Seen(p.X+x, p.Y+y) {
+			if r.Empty(p.X+x, p.Y+y) {
 				neighbors = append(neighbors, components.Position{X: p.X + x, Y: p.Y + y})
 			}
 		}

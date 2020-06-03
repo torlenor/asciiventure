@@ -23,18 +23,3 @@ type CombatResult struct {
 	IntegerValue int32
 	StringValue  string
 }
-
-func (c *Combat) Attack(target *Combat) (results []CombatResult) {
-	if target == nil {
-		return
-	}
-
-	dmg := c.Power - target.Defense
-	if dmg < 0 {
-		dmg = 0
-	}
-
-	results = append(results, CombatResult{Type: TakeDamage, IntegerValue: dmg})
-
-	return
-}

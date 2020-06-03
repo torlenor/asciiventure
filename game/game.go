@@ -8,6 +8,7 @@ import (
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
+	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/maps"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/ui"
@@ -85,6 +86,7 @@ type Game struct {
 
 // Setup should be called first after creating an instance of Game.
 func (g *Game) Setup() {
+	log.Printf("Setting up game...")
 	g.renderScale = 0.8
 
 	g.setupWindow()
@@ -96,6 +98,9 @@ func (g *Game) Setup() {
 	g.characterWindow.SetWrapLength(int(characterWindowRect.W))
 	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect)
 	g.logWindow.SetWrapLength(int(logWindowRect.W))
+
+	g.setupGame()
+	log.Printf("Done setting up game")
 }
 
 // Shutdown should be called when the program quits.
@@ -158,9 +163,10 @@ func (g *Game) createEnemy(name string, gl components.Glyph, p components.Positi
 	return e
 }
 
-func (g *Game) occupied(x, y int32) bool {
+// Occupied returns true if the given tile is occupied by a blocking entity and if the tile is currently visible.
+func (g *Game) Occupied(p components.Position) bool {
 	for _, e := range g.entities {
-		if e.Position.X == x && e.Position.Y == y && e.Blocks && g.currentRoom.Seen(x, y) && g.currentRoom.Visible(x, y) {
+		if e.Position.X == p.X && e.Position.Y == p.Y && e.Blocks && g.player.FoV.Seen(p) && g.player.FoV.Visible(p) {
 			return true
 		}
 	}
@@ -172,7 +178,7 @@ func (g *Game) createEnemyEntities() {
 	for i := 0; i < 5; i++ {
 		x := int32(rand.Intn(int(maxx)))
 		y := int32(rand.Intn(int(maxy)))
-		if g.occupied(x, y) || !g.currentRoom.Empty(x, y) {
+		if g.Occupied(components.Position{X: x, Y: y}) || !g.currentRoom.Empty(x, y) {
 			continue
 		}
 		if rand.Intn(100) < 50 {
@@ -194,7 +200,7 @@ func (g *Game) renderEntities() {
 		if e == g.player || (e.Position.X == g.player.Position.X && e.Position.Y == g.player.Position.Y) {
 			continue
 		}
-		if g.currentRoom.Visible(e.Position.X, e.Position.Y) {
+		if g.player.FoV.Visible(e.Position) {
 			g.renderer.RenderGlyph(e.Glyph, e.Position.X, e.Position.Y)
 		}
 	}
@@ -212,7 +218,7 @@ func (g *Game) draw() {
 
 	// g.renderer.Copy(g.mapTexture, nil, &sdl.Rect{X: 0, Y: 0, W: int32(screenWidth / g.renderScale), H: int32(screenHeight / g.renderScale)})
 	// We are actually rendering it in total again because of FoV updates and some flickering which we encountered when pre-rendering
-	g.currentRoom.Render(g.renderer, g.renderer.OriginX, g.renderer.OriginY)
+	g.currentRoom.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderEntities()
 	if g.gameState != gameOver {
 		g.renderMouseTile()
@@ -232,7 +238,7 @@ func (g *Game) timestep() {
 	if g.nextStep {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
-		g.currentRoom.UpdateFoV(playerViewRange, g.player.Position.X, g.player.Position.Y)
+		fov.UpdateFoV(g.currentRoom, g.player.FoV, playerViewRange, g.player.Position)
 		g.time++
 		g.updateCharacterWindow()
 		g.nextStep = false

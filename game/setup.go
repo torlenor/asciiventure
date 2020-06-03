@@ -44,3 +44,13 @@ func (g *Game) setupRenderer() {
 
 	g.renderer.OriginY = characterWindowRect.H/latticeDY + 1
 }
+
+func (g *Game) setupGame() {
+	g.createGlyphTexture()
+	g.createPlayer()
+	g.loadRoomsFromDirectory("./assets/rooms")
+	g.selectRoom(1)
+
+	g.updateCharacterWindow()
+	g.logWindow.SetText([]string{"Welcome to <Epic Name Here>.", "A small cat takes a stroll and ends up in an epic adventure."})
+}

@@ -9,7 +9,7 @@ import (
 
 func (g *Game) blocked(x, y int32) (*entity.Entity, bool) {
 	for _, e := range g.entities {
-		if e.Blocks == true && e.Position.X == x && e.Position.Y == y && g.currentRoom.Seen(x, y) {
+		if e.Blocks == true && e.Position.X == x && e.Position.Y == y && g.player.FoV.Seen(components.Position{X: x, Y: y}) {
 			return e, true
 		}
 	}
@@ -26,7 +26,7 @@ func (g *Game) killEntity(e *entity.Entity) {
 }
 
 func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
-	results := e.Combat.Attack(target.Combat)
+	results := e.Attack(target)
 	for _, result := range results {
 		if result.Type == components.TakeDamage {
 			target.Combat.HP -= result.IntegerValue
@@ -50,7 +50,7 @@ func (g *Game) updatePositions(state gameState) {
 		if e == g.player {
 			path = g.movementPath
 		} else {
-			path = determineLatticePathSimple(e.Position, g.player.Position)
+			path = determineStraightLinePath(e.Position, g.player.Position)
 		}
 		if len(path) == 0 {
 			continue

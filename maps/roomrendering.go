@@ -4,19 +4,19 @@ import (
 	"log"
 
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/renderers"
 )
 
 // Render renders the current state of the room to the provided renderer.
-func (r *Room) Render(renderer *renderers.Renderer, offsetX, offsetY int32) {
-	// TODO: We can probably implement a fancy way to render a background texture with "." and over that only the things which are visible/seen
+func (r *Room) Render(renderer *renderers.Renderer, playerFoV fov.FoVMap, offsetX, offsetY int32) {
 	for y, l := range r.Tiles {
 		for x, t := range l {
 			if g, ok := r.T.Get(t.Char); ok {
 
-				if t.Visible {
+				if playerFoV.Visible(components.Position{X: x, Y: y}) {
 					g.Color = r.Colors[y][x]
-				} else if t.Seen {
+				} else if playerFoV.Seen(components.Position{X: x, Y: y}) {
 					g.Color = components.ColorRGB{R: 50, G: 100, B: 50}
 				} else {
 					g = r.notSeenGlyph
