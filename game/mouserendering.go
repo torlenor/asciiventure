@@ -1,9 +1,12 @@
 package game
 
-import "github.com/torlenor/asciiventure/components"
+import (
+	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/pathfinding"
+)
 
 func (g *Game) determinePathPlayerMouse() []components.Position {
-	return determineAstarPath(g.currentRoom, g, components.Position{X: g.player.Position.X, Y: g.player.Position.Y}, components.Position{X: g.mouseTileX, Y: g.mouseTileY})
+	return pathfinding.DetermineAstarPath(g.currentGameMap, g, components.Position{X: g.player.Position.X, Y: g.player.Position.Y}, components.Position{X: g.mouseTileX, Y: g.mouseTileY})
 }
 
 func (g *Game) updateMouseTile(x, y int32) {
@@ -15,7 +18,7 @@ func (g *Game) renderMouseTile() {
 	if !g.player.Position.Equal(g.player.TargetPosition) {
 		path := g.movementPath
 		for _, p := range path {
-			notEmpty := !g.currentRoom.Empty(p.X, p.Y) && g.player.FoV.Visible(p)
+			notEmpty := !g.currentGameMap.Empty(p.X, p.Y) && g.player.FoV.Visible(p)
 			_, blocked := g.blocked(p.X, p.Y)
 			color := components.ColorRGBA{R: 100, G: 100, B: 255, A: 64}
 			if notEmpty || blocked {
@@ -29,7 +32,7 @@ func (g *Game) renderMouseTile() {
 	}
 
 	for _, p := range g.markedPath {
-		notEmpty := !g.currentRoom.Empty(p.X, p.Y) && g.player.FoV.Visible(p)
+		notEmpty := !g.currentGameMap.Empty(p.X, p.Y) && g.player.FoV.Visible(p)
 		_, blocked := g.blocked(p.X, p.Y)
 		color := components.ColorRGBA{R: 100, G: 255, B: 100, A: 64}
 		if notEmpty || (blocked && g.player.FoV.Visible(p) && g.player.FoV.Seen(p)) {

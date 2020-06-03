@@ -1,4 +1,4 @@
-package game
+package pathfinding
 
 // An Item is something we manage in a priority queue.
 type item struct {

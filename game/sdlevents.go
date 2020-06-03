@@ -12,49 +12,61 @@ func (g *Game) handleSDLEvents() {
 		case *sdl.QuitEvent:
 			g.quit = true
 		case *sdl.KeyboardEvent:
+
+			// upperCase := false
+			alt := false
+
+			switch t.Keysym.Mod {
+			case sdl.KMOD_LSHIFT:
+				// upperCase = true
+			case sdl.KMOD_RALT:
+				fallthrough
+			case sdl.KMOD_LALT:
+				fallthrough
+			case sdl.KMOD_ALT:
+				alt = true
+			}
+
 			if t.State == sdl.PRESSED {
 				switch t.Keysym.Sym {
 				case sdl.K_ESCAPE:
 					g.quit = true
 					continue
 				case sdl.K_F5:
-					g.loadRoomsFromDirectory("./assets/rooms")
+					g.loadGameMapsFromDirectory("./assets/rooms")
 					continue
 				case sdl.K_UP:
-					g.renderer.OriginY += 2
-					g.preRenderRoom()
+					if alt {
+						g.renderer.OriginY += 2
+						g.preRenderGameMap()
+					}
 					continue
 				case sdl.K_DOWN:
-					g.renderer.OriginY -= 2
-					g.preRenderRoom()
+					if alt {
+						g.renderer.OriginY -= 2
+						g.preRenderGameMap()
+					}
 					continue
 				case sdl.K_LEFT:
-					g.renderer.OriginX += 2
-					g.preRenderRoom()
+					if alt {
+						g.renderer.OriginX += 2
+						g.preRenderGameMap()
+					}
 					continue
 				case sdl.K_RIGHT:
-					g.renderer.OriginX -= 2
-					g.preRenderRoom()
+					if alt {
+						g.renderer.OriginX -= 2
+						g.preRenderGameMap()
+					}
 					continue
 				}
 			}
 
 			keyCode := t.Keysym.Sym
 
-			// upperCase := false
-			// rightAlt := false
-
-			switch t.Keysym.Mod {
-			case sdl.KMOD_LSHIFT:
-				// upperCase = true
-			case sdl.KMOD_RALT:
-				// rightAlt = true
-			}
-
 			if keyCode < 10000 {
 				if t.State == sdl.PRESSED {
 					if keyCode == sdl.K_SPACE {
-						// TODO: Marking next time step should not be event based
 						g.nextStep = true
 						continue
 					}
@@ -62,19 +74,19 @@ func (g *Game) handleSDLEvents() {
 					k := string(keyCode)
 					if keyCode >= '0' && keyCode <= '9' {
 						r, _ := strconv.Atoi(k)
-						g.selectRoom(r)
+						g.selectGameMap(r)
 						continue
 					}
 
 					switch k {
 					case "+":
 						g.renderScale += 0.1
-						g.preRenderRoom()
+						g.preRenderGameMap()
 						g.focusPlayer()
 						continue
 					case "-":
 						g.renderScale -= 0.1
-						g.preRenderRoom()
+						g.preRenderGameMap()
 						g.focusPlayer()
 						continue
 					}

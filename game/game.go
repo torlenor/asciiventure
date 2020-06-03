@@ -9,7 +9,7 @@ import (
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/fov"
-	"github.com/torlenor/asciiventure/maps"
+	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/ui"
 	"github.com/veandco/go-sdl2/sdl"
@@ -62,9 +62,9 @@ type Game struct {
 	defaultFont  *ttf.Font
 	glyphTexture *assets.GlyphTexture
 
-	currentRoom *maps.Room
-	loadedRooms []*maps.Room
-	mapTexture  *sdl.Texture
+	currentGameMap *gamemap.GameMap
+	loadedGameMaps []*gamemap.GameMap
+	mapTexture     *sdl.Texture
 
 	mouseTileX int32
 	mouseTileY int32
@@ -174,11 +174,11 @@ func (g *Game) Occupied(p components.Position) bool {
 }
 
 func (g *Game) createEnemyEntities() {
-	maxx, maxy := g.currentRoom.Dimensions()
+	maxx, maxy := g.currentGameMap.Dimensions()
 	for i := 0; i < 5; i++ {
 		x := int32(rand.Intn(int(maxx)))
 		y := int32(rand.Intn(int(maxy)))
-		if g.Occupied(components.Position{X: x, Y: y}) || !g.currentRoom.Empty(x, y) {
+		if g.Occupied(components.Position{X: x, Y: y}) || !g.currentGameMap.Empty(x, y) {
 			continue
 		}
 		if rand.Intn(100) < 50 {
@@ -218,7 +218,7 @@ func (g *Game) draw() {
 
 	// g.renderer.Copy(g.mapTexture, nil, &sdl.Rect{X: 0, Y: 0, W: int32(screenWidth / g.renderScale), H: int32(screenHeight / g.renderScale)})
 	// We are actually rendering it in total again because of FoV updates and some flickering which we encountered when pre-rendering
-	g.currentRoom.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
+	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderEntities()
 	if g.gameState != gameOver {
 		g.renderMouseTile()
@@ -238,7 +238,7 @@ func (g *Game) timestep() {
 	if g.nextStep {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
-		fov.UpdateFoV(g.currentRoom, g.player.FoV, playerViewRange, g.player.Position)
+		fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
 		g.time++
 		g.updateCharacterWindow()
 		g.nextStep = false

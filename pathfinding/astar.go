@@ -1,49 +1,10 @@
-package game
+package pathfinding
 
 import (
 	"container/heap"
 
 	"github.com/torlenor/asciiventure/components"
 )
-
-type Graph interface {
-	InDimensions(p components.Position) bool
-	Neighbors(p components.Position) []components.Position
-	Distance(a components.Position, b components.Position) float64
-}
-
-type Obstacles interface {
-	Occupied(p components.Position) bool
-}
-
-func determineStraightLinePath(start components.Position, goal components.Position) []components.Position {
-	current := start
-	s := []components.Position{}
-	for goal.X != current.X || goal.Y != current.Y {
-		if current.X < goal.X {
-			current.X++
-		} else if current.X > goal.X {
-			current.X--
-		}
-		if current.Y < goal.Y {
-			current.Y++
-		} else if current.Y > goal.Y {
-			current.Y--
-		}
-		lp := components.Position{X: current.X, Y: current.Y}
-		s = append(s, lp)
-	}
-	return s
-}
-
-func contains(list []components.Position, p components.Position) bool {
-	for _, c := range list {
-		if c.X == p.X && c.Y == p.Y {
-			return true
-		}
-	}
-	return false
-}
 
 func calcCost(current components.Position, next components.Position) float64 {
 	// It seems 3/2 as penalty for diagonal movement looks best
@@ -53,7 +14,7 @@ func calcCost(current components.Position, next components.Position) float64 {
 	return 2
 }
 
-func determineAstarPath(graph Graph, obstacles Obstacles, start components.Position, goal components.Position) []components.Position {
+func DetermineAstarPath(graph Graph, obstacles Obstacles, start components.Position, goal components.Position) []components.Position {
 	if !graph.InDimensions(goal) {
 		return []components.Position{}
 	}

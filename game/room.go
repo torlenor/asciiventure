@@ -5,65 +5,73 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/fov"
-	"github.com/torlenor/asciiventure/maps"
+	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func (g *Game) loadRoomsFromDirectory(dir string) {
+func (g *Game) loadGameMapsFromDirectory(dir string) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
-	g.loadedRooms = []*maps.Room{}
+	g.loadedGameMaps = []*gamemap.GameMap{}
 	for _, f := range files {
 		if !f.IsDir() {
+			ext := path.Ext(f.Name())
+			if ext != ".map" {
+				continue
+			}
 			f, err := os.Open(dir + "/" + f.Name())
 			if err != nil {
 				log.Printf("Error opening %s: %s", f.Name(), err)
 				continue
 			}
 			r4 := bufio.NewReader(f)
-			r, err := maps.NewRoom(r4, g.glyphTexture)
+			r, err := gamemap.NewGameMapFromReader(r4, g.glyphTexture)
 			if err != nil {
 				log.Printf("Error reading room file: %s", err)
 				continue
 			}
 
-			g.loadedRooms = append(g.loadedRooms, &r)
+			g.loadedGameMaps = append(g.loadedGameMaps, &r)
 		}
 	}
 }
 
-func (g *Game) selectRoom(r int) {
+func (g *Game) selectGameMap(r int) {
+	if len(g.loadedGameMaps) == 0 {
+		log.Fatalf("No maps loaded")
+	}
 	r--
-	if r < 0 || r >= len(g.loadedRooms) {
+	if r < 0 || r >= len(g.loadedGameMaps) {
 		return
 	}
 
-	g.currentRoom = g.loadedRooms[r]
+	g.currentGameMap = g.loadedGameMaps[r]
 
 	g.player.FoV.ClearSeen()
 	g.entities = []*entity.Entity{}
 	// TODO: Should not create a new player when this is going to be used as map transition
 	g.createPlayer()
-	g.player.Position = components.Position{X: (g.currentRoom.SpawnPoint.X), Y: g.currentRoom.SpawnPoint.Y}
+	g.player.Position = components.Position{X: (g.currentGameMap.SpawnPoint.X), Y: g.currentGameMap.SpawnPoint.Y}
 	g.player.TargetPosition = g.player.Position
 	g.createEnemyEntities()
-	fov.UpdateFoV(g.currentRoom, g.player.FoV, playerViewRange, g.player.Position)
+	fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
 	g.time = 0
 
 	g.focusPlayer()
-	g.preRenderRoom()
+	g.preRenderGameMap()
 	g.updateCharacterWindow()
 }
 
-func (g *Game) preRenderRoom() {
+func (g *Game) preRenderGameMap() {
 	var err error
 	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
 		sdl.TEXTUREACCESS_TARGET, int32(screenWidth/g.renderScale), int32(screenHeight/g.renderScale))
@@ -75,7 +83,7 @@ func (g *Game) preRenderRoom() {
 	if err != nil {
 		log.Printf("Error setting texture as render target: %s", err)
 	}
-	g.currentRoom.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
+	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderer.Present()
 	g.renderer.SetRenderTarget(nil)
 }

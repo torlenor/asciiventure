@@ -5,6 +5,7 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
+	"github.com/torlenor/asciiventure/pathfinding"
 )
 
 func (g *Game) blocked(x, y int32) (*entity.Entity, bool) {
@@ -50,13 +51,13 @@ func (g *Game) updatePositions(state gameState) {
 		if e == g.player {
 			path = g.movementPath
 		} else {
-			path = determineStraightLinePath(e.Position, g.player.Position)
+			path = pathfinding.DetermineStraightLinePath(e.Position, g.player.Position)
 		}
 		if len(path) == 0 {
 			continue
 		}
 		newP := path[0]
-		roomEmpty := g.currentRoom.Empty(newP.X, newP.Y)
+		roomEmpty := g.currentGameMap.Empty(newP.X, newP.Y)
 		blockingE, blocked := g.blocked(newP.X, newP.Y)
 		if roomEmpty && !blocked {
 			e.MoveTo(newP)
@@ -66,14 +67,15 @@ func (g *Game) updatePositions(state gameState) {
 		} else if blocked {
 			if e.Combat != nil && blockingE.Combat != nil && !(e != g.player && blockingE != g.player) {
 				g.combat(e, blockingE)
+				e.TargetPosition = e.Position
+				g.movementPath = []components.Position{}
 			}
-			e.TargetPosition = e.Position
 		} else if !roomEmpty {
 			e.TargetPosition = e.Position
 		}
 	}
 	if state == playersTurn {
 		g.focusPlayer()
-		g.preRenderRoom()
+		g.preRenderGameMap()
 	}
 }

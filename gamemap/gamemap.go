@@ -1,4 +1,4 @@
-package maps
+package gamemap
 
 import (
 	"bufio"
@@ -16,46 +16,32 @@ const (
 	emptyChar = "·"
 )
 
-type SpawnPoint struct {
-	X int32
-	Y int32
-}
-
-type Tile struct {
-	X int32
-	Y int32
-
-	Char string
-
-	Opaque bool
-}
-
-type Room struct {
+type GameMap struct {
 	T          *assets.GlyphTexture
 	Tiles      map[int32]map[int32]Tile
 	Colors     map[int32]map[int32]components.ColorRGB
-	SpawnPoint SpawnPoint
+	SpawnPoint components.Position
 
 	notSeenGlyph components.Glyph
 }
 
-// NewRoomFromString constructs a room from the provided room description string
-func NewRoomFromString(s string, glyphTexture *assets.GlyphTexture) (Room, error) {
+// NewGameMapFromString constructs a room from the provided room description string
+func NewGameMapFromString(s string, glyphTexture *assets.GlyphTexture) (GameMap, error) {
 	r := strings.NewReader(s)
-	return NewRoom(r, glyphTexture)
+	return NewGameMapFromReader(r, glyphTexture)
 }
 
-// NewRoom constructs a room where the room description is read from the provided Reader
-func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
+// NewGameMapFromReader constructs a room where the room description is read from the provided Reader
+func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameMap, error) {
 	b := bufio.NewReader(r)
 	lines := []string{}
 	for l, _, err := b.ReadLine(); err == nil; l, _, err = b.ReadLine() {
 		lines = append(lines, string(l))
 	}
 	if len(lines) == 0 {
-		return Room{}, fmt.Errorf("Not a valid room description")
+		return GameMap{}, fmt.Errorf("Not a valid room description")
 	}
-	room := Room{
+	room := GameMap{
 		Tiles:  make(map[int32]map[int32]Tile),
 		Colors: make(map[int32]map[int32]components.ColorRGB),
 	}
@@ -73,7 +59,7 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 					log.Printf("Warning: Player spawn point defined more than once")
 					c = " "
 				}
-				room.SpawnPoint = SpawnPoint{X: int32(x), Y: int32(y)}
+				room.SpawnPoint = components.Position{X: int32(x), Y: int32(y)}
 				spawnPointSet = true
 				c = " "
 			}
@@ -96,7 +82,7 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 			if c == "#" {
 				opaque = true
 			}
-			room.Tiles[int32(y)][int32(x)] = Tile{X: x, Y: int32(y), Char: c, Opaque: opaque}
+			room.Tiles[int32(y)][int32(x)] = Tile{Char: c, Opaque: opaque}
 		}
 	}
 
@@ -113,7 +99,7 @@ func NewRoom(r io.Reader, glyphTexture *assets.GlyphTexture) (Room, error) {
 }
 
 // Distance returns the distance between two points on the map.
-func (r Room) Distance(a components.Position, b components.Position) float64 {
+func (r GameMap) Distance(a components.Position, b components.Position) float64 {
 	dx := b.X - a.X
 	dy := b.Y - a.Y
 	return math.Sqrt(float64(dx*dx + dy*dy))
@@ -121,7 +107,7 @@ func (r Room) Distance(a components.Position, b components.Position) float64 {
 
 // Empty returns true if the specified coordinates of the room are empty
 // and inside the map boundaries.
-func (r *Room) Empty(x, y int32) bool {
+func (r *GameMap) Empty(x, y int32) bool {
 	maxx, maxy := r.Dimensions()
 	if x > maxx || x < 0 || y > maxy || y < 0 {
 		return false
@@ -137,12 +123,12 @@ func (r *Room) Empty(x, y int32) bool {
 	return true
 }
 
-func (r *Room) IsOpaque(p components.Position) bool {
+func (r *GameMap) IsOpaque(p components.Position) bool {
 	return r.Tiles[p.Y][p.X].Opaque
 }
 
 // Dimensions returns the max width and height of the room.
-func (r *Room) Dimensions() (int32, int32) {
+func (r *GameMap) Dimensions() (int32, int32) {
 	maxx := int32(0)
 	maxy := int32(0)
 	for y, r := range r.Tiles {
@@ -158,7 +144,7 @@ func (r *Room) Dimensions() (int32, int32) {
 	return maxx, maxy
 }
 
-func (r *Room) InDimensions(p components.Position) bool {
+func (r *GameMap) InDimensions(p components.Position) bool {
 	maxx, maxy := r.Dimensions()
 	if p.X > maxx || p.X < 0 || p.Y > maxy || p.Y < 0 {
 		return false
@@ -167,7 +153,7 @@ func (r *Room) InDimensions(p components.Position) bool {
 }
 
 // Neighbors returns the empty neighbors for a given point
-func (r *Room) Neighbors(p components.Position) []components.Position {
+func (r *GameMap) Neighbors(p components.Position) []components.Position {
 	var neighbors []components.Position
 	for x := int32(-1); x <= 1; x++ {
 		for y := int32(-1); y <= 1; y++ {
