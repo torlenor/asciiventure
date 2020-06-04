@@ -28,6 +28,7 @@ type Entity struct {
 	VisibilityRange int
 
 	Mutations components.Mutations
+	Inventory []*Entity
 }
 
 // NewEntity creates a new unique entity.

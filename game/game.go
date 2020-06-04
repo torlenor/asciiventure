@@ -47,11 +47,11 @@ func (d gameState) String() string {
 var (
 	roomRenderPane      = sdl.Rect{X: screenHeight / 6, Y: 0, W: screenWidth, H: screenHeight - screenHeight/6}
 	characterWindowRect = sdl.Rect{X: 0, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
-	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
-	statusBarRec        = sdl.Rect{X: 0, Y: screenHeight - fontSize - 16, W: screenWidth, H: fontSize + 16}
+	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2 - 1, Y: 0, W: screenWidth/2 + 1, H: screenHeight / 6}
+	statusBarRec        = sdl.Rect{X: 0, Y: screenHeight - fontSize - 16 - 1, W: screenWidth, H: fontSize + 16}
 
-	mutationsRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: screenHeight / 6, W: screenWidth / 4, H: 3 * screenHeight / 6}
-	inventoryRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: 4 * screenHeight / 6, W: screenWidth / 4, H: 2*screenHeight/6 - statusBarRec.H}
+	mutationsRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: screenHeight/6 - 1, W: screenWidth / 4, H: 3*screenHeight/6 + 1}
+	inventoryRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: 4*screenHeight/6 - 1, W: screenWidth / 4, H: 2*screenHeight/6 - statusBarRec.H + 1}
 )
 
 // Game is the main struct of the game
@@ -112,7 +112,7 @@ func (g *Game) Setup() {
 	g.mutations.AddRow("No mutations")
 	g.inventory = ui.NewTextWidget(g.renderer, g.defaultFont, &inventoryRect, true)
 	g.inventory.SetWrapLength(int(inventoryRect.W - 8))
-	g.inventory.AddRow("Inventory Empty")
+	g.inventory.AddRow("Inventory empty")
 
 	g.setupGame()
 	log.Printf("Done setting up game")
@@ -313,9 +313,26 @@ func (g *Game) updateStatusBar() {
 
 func (g *Game) updateMutationsPane() {
 	g.mutations.Clear()
+	if len(g.player.Mutations) == 0 {
+		g.mutations.AddRow("No mutations")
+		return
+	}
 	g.mutations.AddRow("Mutations:")
 	g.mutations.AddRow("----------------")
 	for _, m := range g.player.Mutations {
 		g.mutations.AddRow(m.String())
+	}
+}
+
+func (g *Game) updateInventory() {
+	g.inventory.Clear()
+	if len(g.player.Inventory) == 0 {
+		g.inventory.AddRow("Inventory empty")
+		return
+	}
+	g.inventory.AddRow("Inventory:")
+	g.inventory.AddRow("----------------")
+	for _, m := range g.player.Inventory {
+		g.inventory.AddRow(m.Name)
 	}
 }
