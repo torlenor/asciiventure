@@ -26,16 +26,19 @@ type TextWidget struct {
 
 	wrapLength int
 	maxRows    int
+
+	drawBorder bool
 }
 
 // NewTextWidget returns a new TextWidget
-func NewTextWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect) *TextWidget {
+func NewTextWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, drawBorder bool) *TextWidget {
 	return &TextWidget{
 		renderer:   r,
 		font:       font,
 		dst:        dst,
 		wrapLength: 1000,
 		maxRows:    int(dst.H) / font.Height(),
+		drawBorder: drawBorder,
 	}
 }
 
@@ -98,15 +101,17 @@ func (w *TextWidget) Render() {
 	r.SetDrawColor(0, 0, 0, 255)
 	r.SetClipRect(w.dst)
 	r.FillRect(w.dst)
-	r.SetDrawColor(255, 255, 255, 255)
-	r.DrawRect(w.dst)
+	if w.drawBorder {
+		r.SetDrawColor(255, 255, 255, 255)
+		r.DrawRect(w.dst)
+	}
 	r.SetDrawColor(cr, cg, cb, ca)
 	r.SetDrawBlendMode(bm)
 
 	if len(w.textRows) != 0 {
 		ldst := *w.dst
-		ldst.X += 8
-		ldst.Y += 8
+		ldst.X += 4
+		ldst.Y += 4
 		ldst.W = w.textW
 		ldst.H = w.textH
 
@@ -114,4 +119,8 @@ func (w *TextWidget) Render() {
 	}
 
 	r.SetClipRect(nil)
+}
+
+func (w *TextWidget) Clear() {
+	w.SetText([]string{})
 }

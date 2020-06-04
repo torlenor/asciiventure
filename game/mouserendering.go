@@ -13,6 +13,7 @@ func (g *Game) determinePathPlayerMouse() []components.Position {
 func (g *Game) updateMouseTile(x, y int) {
 	g.mouseTileX = int((float32(x)+0.5)/latticeDX/g.renderScale) - g.renderer.OriginX
 	g.mouseTileY = int((float32(utils.MaxInt(y, screenHeight/6))+0.5)/latticeDY/g.renderScale) - g.renderer.OriginY
+	g.updateStatusBar()
 }
 
 func (g *Game) renderMouseTile() {

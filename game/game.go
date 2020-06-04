@@ -24,7 +24,7 @@ const (
 	fontSize = 16
 
 	screenWidth  = 1366
-	screenHeight = 1000
+	screenHeight = 960
 
 	latticeDX = 19
 	latticeDY = 32
@@ -48,6 +48,7 @@ var (
 	roomRenderPane      = sdl.Rect{X: screenHeight / 6, Y: 0, W: screenWidth, H: screenHeight - screenHeight/6}
 	characterWindowRect = sdl.Rect{X: 0, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
 	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
+	statusBarRec        = sdl.Rect{X: 0, Y: screenHeight - fontSize - 16, W: screenWidth, H: fontSize + 16}
 )
 
 // Game is the main struct of the game
@@ -81,6 +82,7 @@ type Game struct {
 
 	characterWindow *ui.TextWidget
 	logWindow       *ui.TextWidget
+	statusBar       *ui.TextWidget
 }
 
 // Setup should be called first after creating an instance of Game.
@@ -93,13 +95,16 @@ func (g *Game) Setup() {
 
 	g.gameState = playersTurn
 
-	g.characterWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &characterWindowRect)
+	g.characterWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &characterWindowRect, true)
 	g.characterWindow.SetWrapLength(int(characterWindowRect.W))
-	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect)
+	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect, true)
 	g.logWindow.SetWrapLength(int(logWindowRect.W))
+	g.statusBar = ui.NewTextWidget(g.renderer, g.defaultFont, &statusBarRec, true)
+	g.logWindow.SetWrapLength(int(statusBarRec.W))
 
 	g.setupGame()
 	log.Printf("Done setting up game")
+	g.statusBar.AddRow("Done setting up game")
 }
 
 // Shutdown should be called when the program quits.
@@ -244,6 +249,7 @@ func (g *Game) draw() {
 	g.renderer.SetScale(1, 1)
 	g.characterWindow.Render()
 	g.logWindow.Render()
+	g.statusBar.Render()
 
 	g.renderer.Present()
 }
@@ -259,6 +265,21 @@ func (g *Game) timestep() {
 		fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
 		g.time++
 		g.updateCharacterWindow()
+		g.statusBar.SetText([]string{})
 		g.nextStep = false
 	}
+}
+
+func (g *Game) updateStatusBar() {
+	for _, e := range g.entities {
+		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) {
+			if e.Dead {
+				g.statusBar.AddRow(e.Name + "(Dead)")
+			} else {
+				g.statusBar.AddRow(e.Name)
+			}
+			return
+		}
+	}
+	g.statusBar.Clear()
 }
