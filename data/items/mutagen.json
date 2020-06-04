@@ -1,0 +1,16 @@
+{
+    "Name": "Mutagen",
+    "Glyph": {
+        "Char": "M",
+        "Color": {
+            "R": 100,
+            "G": 255,
+            "B": 100
+        }
+    },
+    "Item": {
+        "CanPickup": false,
+        "Consumable": true,
+        "Mutagen": true
+    }
+}

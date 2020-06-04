@@ -49,6 +49,9 @@ var (
 	characterWindowRect = sdl.Rect{X: 0, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
 	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
 	statusBarRec        = sdl.Rect{X: 0, Y: screenHeight - fontSize - 16, W: screenWidth, H: fontSize + 16}
+
+	mutationsRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: screenHeight / 6, W: screenWidth / 4, H: 3 * screenHeight / 6}
+	inventoryRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: 4 * screenHeight / 6, W: screenWidth / 4, H: 2*screenHeight/6 - statusBarRec.H}
 )
 
 // Game is the main struct of the game
@@ -83,6 +86,8 @@ type Game struct {
 	characterWindow *ui.TextWidget
 	logWindow       *ui.TextWidget
 	statusBar       *ui.TextWidget
+	mutations       *ui.TextWidget
+	inventory       *ui.TextWidget
 }
 
 // Setup should be called first after creating an instance of Game.
@@ -96,11 +101,18 @@ func (g *Game) Setup() {
 	g.gameState = playersTurn
 
 	g.characterWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &characterWindowRect, true)
-	g.characterWindow.SetWrapLength(int(characterWindowRect.W))
+	g.characterWindow.SetWrapLength(int(characterWindowRect.W - 8))
 	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect, true)
-	g.logWindow.SetWrapLength(int(logWindowRect.W))
+	g.logWindow.SetWrapLength(int(logWindowRect.W - 8))
 	g.statusBar = ui.NewTextWidget(g.renderer, g.defaultFont, &statusBarRec, true)
-	g.logWindow.SetWrapLength(int(statusBarRec.W))
+	g.statusBar.SetWrapLength(int(statusBarRec.W - 8))
+
+	g.mutations = ui.NewTextWidget(g.renderer, g.defaultFont, &mutationsRect, true)
+	g.mutations.SetWrapLength(int(mutationsRect.W - 8))
+	g.mutations.AddRow("No mutations")
+	g.inventory = ui.NewTextWidget(g.renderer, g.defaultFont, &inventoryRect, true)
+	g.inventory.SetWrapLength(int(inventoryRect.W - 8))
+	g.inventory.AddRow("Inventory Empty")
 
 	g.setupGame()
 	log.Printf("Done setting up game")
@@ -182,13 +194,17 @@ func (g *Game) createEnemyEntities() {
 
 func (g *Game) createItems() {
 	maxx, maxy := g.currentGameMap.Dimensions()
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		p := components.Position{X: rand.Intn(maxx), Y: rand.Intn(maxy)}
 		if g.Occupied(p) || !g.currentGameMap.Empty(p.X, p.Y) {
 			continue
 		}
 		var e *entity.Entity
-		e = entity.ParseItem("./data/items/healingpotion.json")
+		if rand.Intn(100) < 50 {
+			e = entity.ParseItem("./data/items/healingpotion.json")
+		} else {
+			e = entity.ParseItem("./data/items/inventory_mutagen.json")
+		}
 		if e != nil {
 			e.Position = p
 			e.InitialPosition = p
@@ -196,7 +212,7 @@ func (g *Game) createItems() {
 			e.Blocks = false
 			g.entities = append(g.entities, e)
 		} else {
-			log.Printf("Error creating Healing Potion entity")
+			log.Printf("Error creating Item entity")
 		}
 	}
 }
@@ -250,6 +266,10 @@ func (g *Game) draw() {
 	g.characterWindow.Render()
 	g.logWindow.Render()
 	g.statusBar.Render()
+	g.mutations.Render()
+	if g.player.Mutations.Has(components.MutationInventory) {
+		g.inventory.Render()
+	}
 
 	g.renderer.Present()
 }
@@ -271,10 +291,17 @@ func (g *Game) timestep() {
 }
 
 func (g *Game) updateStatusBar() {
+	g.statusBar.Clear()
 	for _, e := range g.entities {
-		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) {
+		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) && e != g.player {
 			if e.Dead {
 				g.statusBar.AddRow(e.Name + "(Dead)")
+			} else if e.Item != nil {
+				if e.Item.CanPickup {
+					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
+				} else if e.Item.Mutagen {
+					g.statusBar.AddRow(e.Name + ": Consume mutagen with 'g'")
+				}
 			} else {
 				g.statusBar.AddRow(e.Name)
 			}
@@ -282,4 +309,13 @@ func (g *Game) updateStatusBar() {
 		}
 	}
 	g.statusBar.Clear()
+}
+
+func (g *Game) updateMutationsPane() {
+	g.mutations.Clear()
+	g.mutations.AddRow("Mutations:")
+	g.mutations.AddRow("----------------")
+	for _, m := range g.player.Mutations {
+		g.mutations.AddRow(m.String())
+	}
 }

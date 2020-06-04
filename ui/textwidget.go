@@ -10,6 +10,11 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 )
 
+type rowEntry struct {
+	text  string
+	count int
+}
+
 // TextWidget is able to render character stats
 type TextWidget struct {
 	renderer *renderers.Renderer
@@ -19,7 +24,7 @@ type TextWidget struct {
 	border *sdl.Texture
 	text   *sdl.Texture
 
-	textRows []string
+	textRows []rowEntry
 
 	textW int32
 	textH int32
@@ -45,7 +50,15 @@ func NewTextWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, drawBor
 // AddRow adds a new line of text.
 // If number of lines > max lines, the oldest will be removed.
 func (w *TextWidget) AddRow(row string) {
-	w.textRows = append(w.textRows, row)
+	if len(w.textRows) > 0 {
+		if w.textRows[len(w.textRows)-1].text == row {
+			w.textRows[len(w.textRows)-1].count++
+		} else {
+			w.textRows = append(w.textRows, rowEntry{text: row, count: 1})
+		}
+	} else {
+		w.textRows = append(w.textRows, rowEntry{text: row, count: 1})
+	}
 	if len(w.textRows) > w.maxRows {
 		w.textRows = w.textRows[1:]
 	}
@@ -59,15 +72,33 @@ func (w *TextWidget) SetWrapLength(wrapLength int) {
 
 // SetText changes the current text to the rows provided as an argument.
 func (w *TextWidget) SetText(rows []string) {
-	w.textRows = rows
+	w.textRows = []rowEntry{}
+	for _, s := range rows {
+		w.textRows = append(w.textRows, rowEntry{text: s, count: 1})
+	}
 	w.createTexure()
+}
+
+func getText(r rowEntry) string {
+	if r.count > 1 {
+		return fmt.Sprintf("%s (%dx)", r.text, r.count)
+	}
+	return fmt.Sprintf("%s", r.text)
+}
+
+func getJoinedText(r []rowEntry) string {
+	var lines []string
+	for _, entry := range r {
+		lines = append(lines, getText(entry))
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (w *TextWidget) createTexure() {
 	if len(w.textRows) == 0 {
 		return
 	}
-	surface, err := w.font.RenderUTF8BlendedWrapped(fmt.Sprintf("%s", strings.Join(w.textRows, "\n")), sdl.Color{R: 255, G: 255, B: 255, A: 255}, w.wrapLength) // we only want manual wrapping and therefore set the wrapLength kinda large
+	surface, err := w.font.RenderUTF8BlendedWrapped(fmt.Sprintf("%s", getJoinedText(w.textRows)), sdl.Color{R: 255, G: 255, B: 255, A: 255}, w.wrapLength) // we only want manual wrapping and therefore set the wrapLength kinda large
 	if err != nil {
 		log.Printf("Error rendering text: %s", err)
 		return

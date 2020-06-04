@@ -164,6 +164,9 @@ func (g *Game) handleSDLEvents() {
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
+					case "g":
+						g.performAction()
+						continue
 					}
 				}
 			}

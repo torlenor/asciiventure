@@ -61,5 +61,5 @@ func (g *Game) setupGame() {
 	g.selectGameMap(1)
 
 	g.updateCharacterWindow()
-	g.logWindow.SetText([]string{"Welcome to <Epic Name Here>.", "A small cat takes a stroll and ends up in an epic adventure."})
+	g.logWindow.SetText([]string{"Welcome to Lala's Quest.", "You are a young cat out hunting for mice."})
 }

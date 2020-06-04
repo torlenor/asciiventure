@@ -25,8 +25,9 @@ type Entity struct {
 
 	FoV fov.FoVMap
 
-	// Visibility
 	VisibilityRange int
+
+	Mutations components.Mutations
 }
 
 // NewEntity creates a new unique entity.
