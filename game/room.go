@@ -60,6 +60,7 @@ func (g *Game) selectGameMap(r int) {
 	g.player.Position = components.Position{X: (g.currentGameMap.SpawnPoint.X), Y: g.currentGameMap.SpawnPoint.Y}
 	g.player.TargetPosition = g.player.Position
 	g.createEnemyEntities()
+	g.createItems()
 	fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})

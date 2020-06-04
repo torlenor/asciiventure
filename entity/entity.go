@@ -17,6 +17,8 @@ type Entity struct {
 	TargetPosition  components.Position
 
 	Combat *components.Combat
+	AI     *components.AI
+	Item   *components.Item
 
 	Blocks bool
 	Dead   bool
@@ -25,10 +27,6 @@ type Entity struct {
 
 	// Visibility
 	VisibilityRange int
-
-	// AI
-	AttackRange      int
-	AttackRangeUntil int
 }
 
 // NewEntity creates a new unique entity.

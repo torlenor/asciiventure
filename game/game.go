@@ -175,6 +175,27 @@ func (g *Game) createEnemyEntities() {
 	}
 }
 
+func (g *Game) createItems() {
+	maxx, maxy := g.currentGameMap.Dimensions()
+	for i := 0; i < 5; i++ {
+		p := components.Position{X: rand.Intn(maxx), Y: rand.Intn(maxy)}
+		if g.Occupied(p) || !g.currentGameMap.Empty(p.X, p.Y) {
+			continue
+		}
+		var e *entity.Entity
+		e = entity.ParseItem("./data/items/healingpotion.json")
+		if e != nil {
+			e.Position = p
+			e.InitialPosition = p
+			e.TargetPosition = p
+			e.Blocks = false
+			g.entities = append(g.entities, e)
+		} else {
+			log.Printf("Error creating Healing Potion entity")
+		}
+	}
+}
+
 func (g *Game) renderChar(char string, color components.ColorRGB, p components.Position) {
 	if gl, ok := g.glyphTexture.Get(char); ok {
 		gl.Color = color
