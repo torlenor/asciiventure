@@ -19,8 +19,6 @@ func (g *Game) blocked(x, y int) (*entity.Entity, bool) {
 
 // killEntity declares the entity dead.
 func (g *Game) killEntity(e *entity.Entity) {
-	e.Glyph, _ = g.glyphTexture.Get("%")
-	e.Glyph.Color = components.ColorRGB{R: 150, G: 150, B: 150}
 	e.Blocks = false
 	e.Dead = true
 	g.logWindow.AddRow(fmt.Sprintf("%s is dead.", e.Name))
@@ -30,9 +28,9 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 	results := e.Attack(target)
 	for _, result := range results {
 		if result.Type == components.TakeDamage {
-			target.Combat.HP -= result.IntegerValue
-			g.logWindow.AddRow(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Combat.HP, target.Combat.MaxHP))
-			if target.Combat.HP <= 0 {
+			target.Combat.CurrentHP -= result.IntegerValue
+			g.logWindow.AddRow(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Combat.CurrentHP, target.Combat.HP))
+			if target.Combat.CurrentHP <= 0 {
 				g.killEntity(target)
 				if target == g.player {
 					g.gameState = gameOver

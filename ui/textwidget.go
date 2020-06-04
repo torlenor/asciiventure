@@ -105,6 +105,8 @@ func (w *TextWidget) Render() {
 
 	if len(w.textRows) != 0 {
 		ldst := *w.dst
+		ldst.X += 8
+		ldst.Y += 8
 		ldst.W = w.textW
 		ldst.H = w.textH
 

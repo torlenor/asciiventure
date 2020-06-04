@@ -16,9 +16,10 @@ const (
 	emptyChar = "·"
 )
 
-var foregroundColorEmptyDot = components.ColorRGB{R: 120, G: 120, B: 120}
+var foregroundColorEmptyDot = components.ColorRGB{R: 220, G: 220, B: 220}
 var foregroundColorWallVisible = components.ColorRGB{R: 200, G: 200, B: 200}
-var foregroundColorNotVisible = components.ColorRGB{R: 100, G: 100, B: 140}
+var foregroundColorNotVisible = components.ColorRGB{R: 80, G: 80, B: 100}
+var foregroundColorEmptyDotNotVisible = components.ColorRGB{R: 40, G: 40, B: 40}
 
 // GameMap holds the data of a game map
 type GameMap struct {
@@ -67,11 +68,12 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				c = " "
 			}
 
-			foregroundColor := foregroundColorWallVisible
-
+			var foregroundColor components.ColorRGB
 			if c == " " {
 				c = "·"
 				foregroundColor = foregroundColorEmptyDot
+			} else {
+				foregroundColor = foregroundColorWallVisible
 			}
 			opaque := false
 			if c == "#" {

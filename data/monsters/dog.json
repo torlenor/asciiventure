@@ -1,0 +1,23 @@
+{
+    "Name": "Dog",
+    "Glyph": {
+        "Char": "d",
+        "Color": {
+            "R": 255,
+            "G": 0,
+            "B": 0
+        }
+    },
+    "Combat": {
+        "HP": 10,
+        "Defense": 2,
+        "Power": 5
+    },
+    "AI": {
+        "AttackRange": 10,
+        "AttackRangeUntil": 30
+    },
+    "Vision": {
+        "Range": 10
+    }
+}

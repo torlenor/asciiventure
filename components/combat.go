@@ -11,11 +11,13 @@ func (d CombatResultType) String() string {
 	return [...]string{"Damage", "Message"}[d]
 }
 
+// Combat holds the properties related to combat.
 type Combat struct {
-	MaxHP   int32
-	HP      int32
-	Defense int32
-	Power   int32
+	HP      int32 `json:"HP"`
+	Defense int32 `json:"Defense"`
+	Power   int32 `json:"Power"`
+
+	CurrentHP int32
 }
 
 type CombatResult struct {

@@ -125,8 +125,8 @@ func (g *Game) createGlyphTexture() {
 func (g *Game) createPlayer() {
 	if gl, ok := g.glyphTexture.Get("@"); ok {
 		gl.Color = components.ColorRGB{R: 0, G: 128, B: 255}
-		e := entity.NewEntity("Player", gl, components.Position{}, true)
-		e.Combat = &components.Combat{MaxHP: 20, HP: 20, Power: 5, Defense: 2}
+		e := entity.NewEntity("Player", "@", components.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
+		e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
 		g.entities = append(g.entities, e)
 		g.player = e
 	} else {
@@ -134,8 +134,8 @@ func (g *Game) createPlayer() {
 	}
 }
 
-func (g *Game) createEnemy(name string, gl components.Glyph, p components.Position) *entity.Entity {
-	e := entity.NewEntity(name, gl, p, true)
+func (g *Game) createEnemy(name string, char string, color components.ColorRGB, p components.Position) *entity.Entity {
+	e := entity.NewEntity(name, char, color, p, true)
 	e.TargetPosition = p
 	return e
 }
@@ -153,22 +153,42 @@ func (g *Game) Occupied(p components.Position) bool {
 func (g *Game) createEnemyEntities() {
 	maxx, maxy := g.currentGameMap.Dimensions()
 	for i := 0; i < 5; i++ {
-		x := int(rand.Intn(int(maxx)))
-		y := int(rand.Intn(int(maxy)))
-		if g.Occupied(components.Position{X: x, Y: y}) || !g.currentGameMap.Empty(x, y) {
+		p := components.Position{X: rand.Intn(maxx), Y: rand.Intn(maxy)}
+		if g.Occupied(p) || !g.currentGameMap.Empty(p.X, p.Y) {
 			continue
 		}
+		var e *entity.Entity
 		if rand.Intn(100) < 50 {
-			e := g.createMouse(components.Position{X: x, Y: y})
-			if e != nil {
-				g.entities = append(g.entities, e)
-			}
+			e = g.createMouse()
+
 		} else {
-			e := g.createDog(components.Position{X: x, Y: y})
-			if e != nil {
-				g.entities = append(g.entities, e)
-			}
+			e = g.createDog()
 		}
+		if e != nil {
+			e.Position = p
+			e.InitialPosition = p
+			e.TargetPosition = p
+			g.entities = append(g.entities, e)
+		} else {
+			log.Printf("Error creating Mouse entity")
+		}
+	}
+}
+
+func (g *Game) renderChar(char string, color components.ColorRGB, p components.Position) {
+	if gl, ok := g.glyphTexture.Get(char); ok {
+		gl.Color = color
+		g.renderer.RenderGlyph(gl, p.X, p.Y)
+	} else {
+		log.Printf("Unable to render '%s'. Glyph not found.", char)
+	}
+}
+
+func (g *Game) renderEntity(e *entity.Entity) {
+	if e.Dead {
+		g.renderChar("%", components.ColorRGB{R: 150, G: 150, B: 150}, e.Position)
+	} else {
+		g.renderChar(e.Char, e.Color, e.Position)
 	}
 }
 
@@ -178,10 +198,10 @@ func (g *Game) renderEntities() {
 			continue
 		}
 		if g.player.FoV.Visible(e.Position) {
-			g.renderer.RenderGlyph(e.Glyph, e.Position.X, e.Position.Y)
+			g.renderEntity(e)
 		}
 	}
-	g.renderer.RenderGlyph(g.player.Glyph, g.player.Position.X, g.player.Position.Y)
+	g.renderEntity(g.player)
 }
 
 func (g *Game) setTargetPosition(x, y int) {
@@ -208,7 +228,7 @@ func (g *Game) draw() {
 }
 
 func (g *Game) updateCharacterWindow() {
-	g.characterWindow.SetText([]string{fmt.Sprintf("Time: %d", g.time), fmt.Sprintf("Health: %d/%d", g.player.Combat.HP, g.player.Combat.MaxHP)})
+	g.characterWindow.SetText([]string{fmt.Sprintf("Time: %d", g.time), fmt.Sprintf("HP: %d/%d", g.player.Combat.CurrentHP, g.player.Combat.HP)})
 }
 
 func (g *Game) timestep() {

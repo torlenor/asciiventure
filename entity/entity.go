@@ -9,31 +9,34 @@ import (
 type Entity struct {
 	Name string
 
-	Glyph components.Glyph
+	Char  string
+	Color components.ColorRGB
 
-	Position       components.Position
-	TargetPosition components.Position
+	InitialPosition components.Position
+	Position        components.Position
+	TargetPosition  components.Position
 
 	Combat *components.Combat
 
 	Blocks bool
 	Dead   bool
 
+	FoV fov.FoVMap
+
 	// Visibility
-	visibilityRange int
-	FoV             fov.FoVMap
+	VisibilityRange int
 
 	// AI
 	AttackRange      int
-	InitialPosition  components.Position
 	AttackRangeUntil int
 }
 
 // NewEntity creates a new unique entity.
-func NewEntity(name string, glyph components.Glyph, initPosition components.Position, blocks bool) *Entity {
+func NewEntity(name string, char string, color components.ColorRGB, initPosition components.Position, blocks bool) *Entity {
 	return &Entity{
 		Name:            name,
-		Glyph:           glyph,
+		Char:            char,
+		Color:           color,
 		Position:        initPosition,
 		Blocks:          blocks,
 		FoV:             make(fov.FoVMap),

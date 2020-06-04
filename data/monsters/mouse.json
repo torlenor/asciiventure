@@ -1,0 +1,23 @@
+{
+    "Name": "Mouse",
+    "Glyph": {
+        "Char": "m",
+        "Color": {
+            "R": 200,
+            "G": 200,
+            "B": 200
+        }
+    },
+    "Combat": {
+        "HP": 2,
+        "Defense": 0,
+        "Power": 1
+    },
+    "AI": {
+        "AttackRange": 4,
+        "AttackRangeUntil": 10
+    },
+    "Vision": {
+        "Range": 10
+    }
+}
