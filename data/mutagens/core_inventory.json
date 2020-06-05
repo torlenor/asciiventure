@@ -8,10 +8,9 @@
             "B": 100
         }
     },
-    "Item": {
-        "CanPickup": false,
-        "Consumable": true,
-        "Mutagen": true,
-        "MutagenType": "Inventory"
+    "Mutagen": {
+        "IsMutagen": true,
+        "Type": "Inventory",
+        "Category": "Core"
     }
 }

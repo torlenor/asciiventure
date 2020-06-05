@@ -1,0 +1,16 @@
+{
+    "Name": "XRay Mutagen",
+    "Glyph": {
+        "Char": "I",
+        "Color": {
+            "R": 255,
+            "G": 100,
+            "B": 100
+        }
+    },
+    "Mutagen": {
+        "IsMutagen": true,
+        "Type": "XRay",
+        "Category": "Eyes"
+    }
+}

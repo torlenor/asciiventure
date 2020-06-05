@@ -165,6 +165,7 @@ func (g *Game) handleSDLEvents() {
 						g.nextStep = true
 						continue
 					case "g":
+						// TODO: This should not be done here but in turn for player
 						g.performAction()
 						continue
 					}

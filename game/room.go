@@ -61,7 +61,8 @@ func (g *Game) selectGameMap(r int) {
 	g.player.TargetPosition = g.player.Position
 	g.createEnemyEntities()
 	g.createItems()
-	fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
+	g.createMutagens()
+	fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
 	g.time = 0

@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/torlenor/asciiventure/components"
 )
@@ -10,7 +11,7 @@ func (g *Game) performAction() {
 	for i, e := range g.entities {
 		if e.Position.Equal(g.player.Position) && e != g.player {
 			if e.Item != nil {
-				if e.Item.CanPickup {
+				if e.Item != nil && e.Item.CanPickup {
 					if g.player.Mutations.Has(components.MutationInventory) {
 						g.player.Inventory = append(g.player.Inventory, e)
 						g.entities[i] = nil
@@ -19,13 +20,17 @@ func (g *Game) performAction() {
 					} else {
 						g.logWindow.AddRow(fmt.Sprintf("You are a cat, you cannot pick up things (or can you?)."))
 					}
-				} else if e.Item.Mutagen {
+				} else if len(e.Mutations) > 0 {
 					g.player.Mutations = append(g.player.Mutations, e.Mutations...)
 					for _, m := range e.Mutations {
-						g.logWindow.AddRow(fmt.Sprintf("Mutation %s consumed.", m))
+						g.logWindow.AddRow(fmt.Sprintf("Mutation (%s) %s consumed.", m.Category, m.Type))
 					}
 					g.entities[i] = nil
 					g.updateMutationsPane()
+					if g.player.Mutations.Has(components.MutationIncreasedVision) {
+						log.Printf("Increasing range")
+						g.player.VisibilityRange += 10
+					}
 				}
 				break
 			}

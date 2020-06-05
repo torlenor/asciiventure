@@ -31,11 +31,14 @@ type EntityData struct {
 		Range int `json:"Range"`
 	} `json:"Vision"`
 	Item struct {
-		CanPickup   bool   `json:"CanPickup"`
-		Consumable  bool   `json:"Consumable"`
-		Mutagen     bool   `json:"Mutagen"`
-		MutagenType string `json:"MutagenType"`
+		CanPickup  bool `json:"CanPickup"`
+		Consumable bool `json:"Consumable"`
 	} `json:"Item"`
+	Mutagen struct {
+		IsMutagen bool   `json:"IsMutagen"`
+		Type      string `json:"Type"`
+		Category  string `json:"Category"`
+	} `json:"Mutagen"`
 }
 
 // ParseMonster parses a monster description and returns the corresponding entity.
@@ -69,14 +72,39 @@ func ParseItem(filename string) *Entity {
 
 	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
 	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable, Mutagen: data.Item.Mutagen}
-	if data.Item.Mutagen {
-		if m, err := components.MutationFromString(data.Item.MutagenType); err == nil {
-			e.Mutations = append(e.Mutations, m)
+	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable}
+
+	return e
+}
+
+// ParseMutagen parses a mutagen description and returns the corresponding entity.
+func ParseMutagen(filename string) *Entity {
+	file, _ := ioutil.ReadFile(filename)
+	data := EntityData{}
+
+	err := json.Unmarshal([]byte(file), &data)
+	if err != nil {
+		log.Printf("Error parsing mutagen file %s: %s", filename, err)
+	}
+
+	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
+	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
+	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable}
+	if data.Mutagen.IsMutagen {
+		if t, err := components.MutationTypeFromString(data.Mutagen.Type); err == nil {
+			if c, err := components.MutationCategoryFromString(data.Mutagen.Category); err == nil {
+				e.Mutations = append(e.Mutations, components.Mutation{Type: t, Category: c})
+			} else {
+				log.Printf("%s", err)
+				return nil
+			}
 		} else {
 			log.Printf("%s", err)
 			return nil
 		}
+	} else {
+		log.Printf("Not a mutagen")
+		return nil
 	}
 
 	return e

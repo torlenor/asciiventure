@@ -24,12 +24,10 @@ const (
 	fontSize = 16
 
 	screenWidth  = 1366
-	screenHeight = 960
+	screenHeight = 720
 
 	latticeDX = 19
 	latticeDY = 32
-
-	playerViewRange = 20
 )
 
 type gameState int
@@ -83,11 +81,12 @@ type Game struct {
 	nextStep  bool
 	gameState gameState
 
+	// UI
 	characterWindow *ui.TextWidget
 	logWindow       *ui.TextWidget
 	statusBar       *ui.TextWidget
 	mutations       *ui.TextWidget
-	inventory       *ui.TextWidget
+	inventory       *ui.InventoryWidget
 }
 
 // Setup should be called first after creating an instance of Game.
@@ -110,9 +109,8 @@ func (g *Game) Setup() {
 	g.mutations = ui.NewTextWidget(g.renderer, g.defaultFont, &mutationsRect, true)
 	g.mutations.SetWrapLength(int(mutationsRect.W - 8))
 	g.mutations.AddRow("No mutations")
-	g.inventory = ui.NewTextWidget(g.renderer, g.defaultFont, &inventoryRect, true)
+	g.inventory = ui.NewInventoryWidget(g.renderer, g.defaultFont, &inventoryRect, true)
 	g.inventory.SetWrapLength(int(inventoryRect.W - 8))
-	g.inventory.AddRow("Inventory empty")
 
 	g.setupGame()
 	log.Printf("Done setting up game")
@@ -144,6 +142,7 @@ func (g *Game) createPlayer() {
 		gl.Color = components.ColorRGB{R: 0, G: 128, B: 255}
 		e := entity.NewEntity("Player", "@", components.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
 		e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
+		e.VisibilityRange = 20
 		g.entities = append(g.entities, e)
 		g.player = e
 	} else {
@@ -203,7 +202,6 @@ func (g *Game) createItems() {
 		if rand.Intn(100) < 50 {
 			e = entity.ParseItem("./data/items/healingpotion.json")
 		} else {
-			e = entity.ParseItem("./data/items/inventory_mutagen.json")
 		}
 		if e != nil {
 			e.Position = p
@@ -282,7 +280,7 @@ func (g *Game) timestep() {
 	if g.nextStep {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
-		fov.UpdateFoV(g.currentGameMap, g.player.FoV, playerViewRange, g.player.Position)
+		fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
 		g.time++
 		g.updateCharacterWindow()
 		g.statusBar.SetText([]string{})
@@ -296,14 +294,14 @@ func (g *Game) updateStatusBar() {
 		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) && e != g.player {
 			if e.Dead {
 				g.statusBar.AddRow(e.Name + "(Dead)")
-			} else if e.Item != nil {
-				if e.Item.CanPickup {
-					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
-				} else if e.Item.Mutagen {
-					g.statusBar.AddRow(e.Name + ": Consume mutagen with 'g'")
-				}
 			} else {
-				g.statusBar.AddRow(e.Name)
+				if e.Item != nil && e.Item.CanPickup {
+					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
+				} else if len(e.Mutations) > 0 {
+					g.statusBar.AddRow(e.Name + ": Consume mutagen with 'g'")
+				} else {
+					g.statusBar.AddRow(e.Name)
+				}
 			}
 			return
 		}
@@ -320,19 +318,10 @@ func (g *Game) updateMutationsPane() {
 	g.mutations.AddRow("Mutations:")
 	g.mutations.AddRow("----------------")
 	for _, m := range g.player.Mutations {
-		g.mutations.AddRow(m.String())
+		g.mutations.AddRow(fmt.Sprintf("(%s) %s", m.Category, m.Type))
 	}
 }
 
 func (g *Game) updateInventory() {
-	g.inventory.Clear()
-	if len(g.player.Inventory) == 0 {
-		g.inventory.AddRow("Inventory empty")
-		return
-	}
-	g.inventory.AddRow("Inventory:")
-	g.inventory.AddRow("----------------")
-	for _, m := range g.player.Inventory {
-		g.inventory.AddRow(m.Name)
-	}
+	g.inventory.UpdateInventory(g.player.Inventory)
 }
