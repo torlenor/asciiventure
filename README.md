@@ -1,3 +1,3 @@
-# asciiventure
+# Lala's Quest
 
-A game in ascii about nothing.
+A roguelike exploration game featuring a little cat, monsters and mutations.
