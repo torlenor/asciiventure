@@ -54,6 +54,10 @@ func (r *Renderer) SetScale(scaleX float32, scaleY float32) error {
 	return r.renderer.SetScale(scaleX, scaleY)
 }
 
+func (r *Renderer) SetDrawColor(re, g, b, a uint8) error {
+	return r.renderer.SetDrawColor(re, g, b, a)
+}
+
 func (r *Renderer) Copy(texture *sdl.Texture, src *sdl.Rect, dst *sdl.Rect) error {
 	return r.renderer.Copy(texture, src, dst)
 }

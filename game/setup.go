@@ -3,6 +3,7 @@ package game
 import (
 	"log"
 	"math/rand"
+	"runtime"
 	"time"
 
 	"github.com/torlenor/asciiventure/gamemap"
@@ -26,13 +27,17 @@ func (g *Game) setupWindow() {
 		log.Fatalf("Failed to initialize sdl: %s", err)
 	}
 
-	g.window, err = sdl.CreateWindow(windowName, sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
+	g.window, err = sdl.CreateWindow(windowName, sdl.WINDOWPOS_CENTERED,
+		sdl.WINDOWPOS_CENTERED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatalf("Failed to create window: %s", err)
 	}
 
 	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "1")
+
+	if runtime.GOOS == "windows" {
+		sdl.SetHint(sdl.HINT_RENDER_DRIVER, "opengl")
+	}
 }
 
 func (g *Game) setupRenderer() {

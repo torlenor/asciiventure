@@ -226,6 +226,7 @@ func (g *Game) setTargetPosition(x, y int) {
 }
 
 func (g *Game) draw() {
+	g.renderer.GetRenderer().SetClipRect(nil)
 	g.renderer.SetScale(g.renderScale, g.renderScale)
 	g.renderer.Clear()
 
