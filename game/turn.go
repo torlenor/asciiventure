@@ -45,10 +45,8 @@ func (g *Game) updatePositions(state gameState) {
 		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.Dead {
 			continue
 		}
-		var path []components.Position
 		var newPosition components.Position
 		if e == g.player {
-			path = g.movementPath
 			if len(g.movementPath) > 0 {
 				newPosition = g.movementPath[0]
 			} else {
@@ -56,6 +54,7 @@ func (g *Game) updatePositions(state gameState) {
 			}
 		} else {
 			if e.AI != nil {
+				var path []components.Position
 				if g.currentGameMap.Distance(g.player.Position, e.InitialPosition) <= float64(e.AI.AttackRange) && g.currentGameMap.Distance(e.Position, e.InitialPosition) <= float64(e.AI.AttackRangeUntil) {
 					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, g.player.Position)
 				} else {

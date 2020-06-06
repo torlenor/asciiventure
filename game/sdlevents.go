@@ -53,6 +53,7 @@ func (g *Game) handleSDLEvents() {
 						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 					}
@@ -63,6 +64,7 @@ func (g *Game) handleSDLEvents() {
 						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 					}
@@ -73,6 +75,7 @@ func (g *Game) handleSDLEvents() {
 						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.nextStep = true
 					}
@@ -83,6 +86,7 @@ func (g *Game) handleSDLEvents() {
 						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.nextStep = true
 					}
@@ -122,44 +126,52 @@ func (g *Game) handleSDLEvents() {
 					// b	j	n
 					case "y":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "k":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "u":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "h":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.nextStep = true
 						continue
 					case "l":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.nextStep = true
 						continue
 					case "b":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
 					case "j":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
 					case "n":
 						g.movementPath = []components.Position{}
+						g.player.TargetPosition = g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
