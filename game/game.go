@@ -297,7 +297,7 @@ func (g *Game) updateMutationsPane() {
 	g.mutations.AddRow("Mutations:")
 	g.mutations.AddRow("----------------")
 	for _, m := range g.player.Mutations {
-		g.mutations.AddRow(fmt.Sprintf("(%s) %s", m.Category, m.Type))
+		g.mutations.AddRow(fmt.Sprintf("%s", m))
 	}
 }
 

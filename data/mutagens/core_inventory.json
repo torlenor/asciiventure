@@ -11,6 +11,7 @@
     "Mutagen": {
         "IsMutagen": true,
         "Type": "Inventory",
-        "Category": "Core"
+        "Category": "Core",
+        "Activatable": false
     }
 }

@@ -53,9 +53,7 @@ func (g *Game) selectGameMap(r int) {
 	g.currentGameMap = g.loadedGameMaps[r]
 
 	g.player.FoV.ClearSeen()
-	g.entities = []*entity.Entity{}
-	// TODO: Should not create a new player when this is going to be used as map transition
-	g.createPlayer()
+	g.entities = []*entity.Entity{g.player}
 	g.player.Position = components.Position{X: (g.currentGameMap.SpawnPoint.X), Y: g.currentGameMap.SpawnPoint.Y}
 	g.player.TargetPosition = g.player.Position
 	g.createEnemyEntities()

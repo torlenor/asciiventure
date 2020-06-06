@@ -5,8 +5,10 @@ import (
 	"strings"
 )
 
+// MutationType type
 type MutationType int
 
+// Available MutationTypes
 const (
 	MutationUnknown MutationType = iota
 	MutationInitial
@@ -15,8 +17,10 @@ const (
 	MutationIncreasedVision
 )
 
+// MutationCategory type
 type MutationCategory int
 
+// Available MutationCategories
 const (
 	MutationCategoryUnknown MutationCategory = iota
 	MutationCategoryCore
@@ -33,12 +37,41 @@ func (d MutationCategory) String() string {
 	return [...]string{"Unknown", "Core", "Eyes", "Claws", "Tail"}[d]
 }
 
+// Mutation describes properties of one mutation entity.
 type Mutation struct {
-	Type     MutationType
-	Category MutationCategory
+	Type           MutationType
+	Category       MutationCategory
+	Activatable    bool
+	Ready          bool
+	Active         bool
+	CooldownTurns  int
+	ActiveTurns    int
+	TurnsRemaining int
 }
 
+func (m Mutation) String() string {
+	if m.Activatable {
+		if m.Ready {
+			return fmt.Sprintf("[%s] %s (Ready)", m.Category, m.Type)
+		} else if m.Active {
+			return fmt.Sprintf("[%s] %s (Active, %d turns remaining)", m.Category, m.Type, m.TurnsRemaining)
+		}
+		// on cooldown
+		return fmt.Sprintf("[%s] %s (On cooldown, %d turns remaining)", m.Category, m.Type, m.TurnsRemaining)
+	}
+	// always active
+	return fmt.Sprintf("[%s] %s", m.Category, m.Type)
+}
+
+// Mutations holds a list of Mutations
 type Mutations []Mutation
+
+func (m Mutation) IsCategory(category MutationCategory) bool {
+	if m.Category == category {
+		return true
+	}
+	return false
+}
 
 func (m Mutations) Has(mutation MutationType) bool {
 	for _, m := range m {

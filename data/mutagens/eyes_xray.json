@@ -11,6 +11,9 @@
     "Mutagen": {
         "IsMutagen": true,
         "Type": "XRay",
-        "Category": "Eyes"
+        "Category": "Eyes",
+        "Activatable": true,
+        "CooldownTurns": 10,
+        "ActiveTurns": 5
     }
 }

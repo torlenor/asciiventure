@@ -22,10 +22,33 @@ func (g *Game) GameLoop() {
 		start = time.Now()
 		<-ticker.C
 		spareMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
-		if false {
+		if true {
 			fmt.Printf("Game logic duration: %.2f ms, draw duration: %.2f ms, total: %.2f ms, spare: %.2f ms\n", gameLogicUpdateMs, drawUpdateMs, gameLogicUpdateMs+drawUpdateMs, spareMs)
 		}
 	}
 
 	ticker.Stop()
+}
+
+func (g *Game) updateMutations() {
+	for _, e := range g.entities {
+		for _, m := range e.Mutations {
+			if m.Activatable {
+				if m.Active {
+					m.TurnsRemaining--
+					if m.TurnsRemaining == 0 {
+						m.Active = false
+					}
+				} else if m.TurnsRemaining != 0 {
+					// Must be on cooldown
+					m.TurnsRemaining--
+					if m.TurnsRemaining == 0 {
+						m.Ready = true
+					}
+				} else if m.TurnsRemaining == 0 {
+					m.Ready = true
+				}
+			}
+		}
+	}
 }
