@@ -89,6 +89,5 @@ func (g *Game) updatePositions(state gameState) {
 	}
 	if state == playersTurn {
 		g.focusPlayer()
-		g.preRenderGameMap()
 	}
 }

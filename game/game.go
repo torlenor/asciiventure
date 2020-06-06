@@ -259,6 +259,9 @@ func (g *Game) timestep() {
 		fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
 		g.time++
 		g.updateCharacterWindow()
+		g.updateInventory()
+		g.updateMutations()
+		g.updateMutationsPane()
 		g.statusBar.SetText([]string{})
 		g.nextStep = false
 	}

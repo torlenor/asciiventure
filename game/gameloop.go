@@ -13,7 +13,6 @@ func (g *Game) GameLoop() {
 		g.handleSDLEvents()
 		if g.gameState != gameOver {
 			g.timestep()
-			g.updateInventory()
 		}
 		gameLogicUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
 

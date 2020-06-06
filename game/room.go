@@ -11,7 +11,6 @@ import (
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/gamemap"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 func (g *Game) loadGameMapsFromDirectory(dir string) {
@@ -65,29 +64,30 @@ func (g *Game) selectGameMap(r int) {
 	fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
-	g.time = 0
 
 	g.focusPlayer()
-	g.preRenderGameMap()
 	g.updateCharacterWindow()
+	g.updateInventory()
+	g.updateMutations()
+	g.updateMutationsPane()
 }
 
-func (g *Game) preRenderGameMap() {
-	var err error
-	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
-		sdl.TEXTUREACCESS_TARGET, int(screenWidth/g.renderScale), int(screenHeight/g.renderScale))
-	if err != nil {
-		log.Printf("Error creating texture: %s", err)
-	}
-	err = g.renderer.SetRenderTarget(g.mapTexture)
-	g.renderer.Clear()
-	if err != nil {
-		log.Printf("Error setting texture as render target: %s", err)
-	}
-	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
-	g.renderer.Present()
-	g.renderer.SetRenderTarget(nil)
-}
+// func (g *Game) preRenderGameMap() {
+// 	var err error
+// 	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
+// 		sdl.TEXTUREACCESS_TARGET, int(screenWidth/g.renderScale), int(screenHeight/g.renderScale))
+// 	if err != nil {
+// 		log.Printf("Error creating texture: %s", err)
+// 	}
+// 	err = g.renderer.SetRenderTarget(g.mapTexture)
+// 	g.renderer.Clear()
+// 	if err != nil {
+// 		log.Printf("Error setting texture as render target: %s", err)
+// 	}
+// 	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
+// 	g.renderer.Present()
+// 	g.renderer.SetRenderTarget(nil)
+// }
 
 func (g *Game) focusPlayer() {
 	g.renderer.OriginX = -g.player.Position.X + int(screenWidth/latticeDX/2/g.renderScale)

@@ -50,7 +50,6 @@ func (g *Game) handleSDLEvents() {
 				case sdl.K_UP:
 					if alt {
 						g.renderer.OriginY += 2
-						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
 						g.player.TargetPosition = g.player.Position
@@ -61,7 +60,6 @@ func (g *Game) handleSDLEvents() {
 				case sdl.K_DOWN:
 					if alt {
 						g.renderer.OriginY -= 2
-						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
 						g.player.TargetPosition = g.player.Position
@@ -72,7 +70,6 @@ func (g *Game) handleSDLEvents() {
 				case sdl.K_LEFT:
 					if alt {
 						g.renderer.OriginX += 2
-						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
 						g.player.TargetPosition = g.player.Position
@@ -83,7 +80,6 @@ func (g *Game) handleSDLEvents() {
 				case sdl.K_RIGHT:
 					if alt {
 						g.renderer.OriginX -= 2
-						g.preRenderGameMap()
 					} else {
 						g.movementPath = []components.Position{}
 						g.player.TargetPosition = g.player.Position
@@ -113,12 +109,10 @@ func (g *Game) handleSDLEvents() {
 					switch k {
 					case "+":
 						g.renderScale += 0.1
-						g.preRenderGameMap()
 						g.focusPlayer()
 						continue
 					case "-":
 						g.renderScale -= 0.1
-						g.preRenderGameMap()
 						g.focusPlayer()
 						continue
 					// y	k	u
