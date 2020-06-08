@@ -9,7 +9,6 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
-	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/gamemap"
 )
 
@@ -59,14 +58,13 @@ func (g *Game) selectGameMap(r int) {
 	g.createEnemyEntities()
 	g.createItems()
 	g.createMutagens()
-	fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
+	g.updateFoVs()
 	g.gameState = playersTurn
 	g.logWindow.SetText([]string{})
 
 	g.focusPlayer()
 	g.updateCharacterWindow()
 	g.updateInventory()
-	g.updateMutations()
 	g.updateMutationsPane()
 }
 

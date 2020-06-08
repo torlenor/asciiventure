@@ -16,9 +16,10 @@ type Entity struct {
 	Position        components.Position
 	TargetPosition  components.Position
 
-	Combat *components.Combat
-	AI     *components.AI
-	Item   *components.Item
+	Combat   *components.Combat
+	AI       *components.AI
+	Item     *components.Item
+	Mutation *components.Mutation
 
 	Blocks bool
 	Dead   bool

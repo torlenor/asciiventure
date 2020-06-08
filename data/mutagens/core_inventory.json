@@ -1,7 +1,7 @@
 {
     "Name": "Inventory Mutagen",
     "Glyph": {
-        "Char": "I",
+        "Char": "i",
         "Color": {
             "R": 100,
             "G": 255,
@@ -10,8 +10,7 @@
     },
     "Mutagen": {
         "IsMutagen": true,
-        "Type": "Inventory",
-        "Category": "Core",
-        "Activatable": false
+        "Effect": "Inventory",
+        "Category": "Core"
     }
 }

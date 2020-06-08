@@ -35,12 +35,10 @@ type EntityData struct {
 		Consumable bool `json:"Consumable"`
 	} `json:"Item"`
 	Mutagen struct {
-		IsMutagen     bool   `json:"IsMutagen"`
-		Type          string `json:"Type"`
-		Category      string `json:"Category"`
-		Activatable   bool   `json:"Activatable"`
-		CooldownTurns int    `json:"CooldownTurns"`
-		ActiveTurns   int    `json:"ActiveTurns"`
+		IsMutagen bool   `json:"IsMutagen"`
+		Type      string `json:"Effect"`
+		Category  string `json:"Category"`
+		Data      int    `json:"Data"`
 	} `json:"Mutagen"`
 }
 

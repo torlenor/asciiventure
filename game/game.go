@@ -23,8 +23,8 @@ const (
 	fontPath = "./assets/fonts/RobotoMono-Regular.ttf"
 	fontSize = 16
 
-	screenWidth  = 1366
-	screenHeight = 720
+	screenWidth  = 1900
+	screenHeight = 1024
 
 	latticeDX = 19
 	latticeDY = 32
@@ -242,7 +242,7 @@ func (g *Game) draw() {
 	g.logWindow.Render()
 	g.statusBar.Render()
 	g.mutations.Render()
-	if g.player.Mutations.Has(components.MutationInventory) {
+	if g.player.Mutations.Has(components.MutationEffectInventory) {
 		g.inventory.Render()
 	}
 
@@ -257,14 +257,23 @@ func (g *Game) timestep() {
 	if g.nextStep {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
-		fov.UpdateFoV(g.currentGameMap, g.player.FoV, g.player.VisibilityRange, g.player.Position)
+		g.updateFoVs()
 		g.time++
 		g.updateCharacterWindow()
 		g.updateInventory()
-		g.updateMutations()
 		g.updateMutationsPane()
 		g.statusBar.SetText([]string{})
 		g.nextStep = false
+	}
+}
+
+func (g *Game) updateFoVs() {
+	for _, e := range g.entities {
+		if e.Mutations.Has(components.MutationEffectXRay) {
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position, true)
+		} else {
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position, false)
+		}
 	}
 }
 
@@ -275,10 +284,10 @@ func (g *Game) updateStatusBar() {
 			if e.Dead {
 				g.statusBar.AddRow(e.Name + "(Dead)")
 			} else {
-				if e.Item != nil && e.Item.CanPickup {
+				if e.Item != nil {
 					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
-				} else if len(e.Mutations) > 0 {
-					g.statusBar.AddRow(e.Name + ": Consume mutagen with 'g'")
+				} else if e.Mutation != nil {
+					g.statusBar.AddRow(e.Mutation.String() + ": " + e.Mutation.GetDescription())
 				} else {
 					g.statusBar.AddRow(e.Name)
 				}

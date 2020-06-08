@@ -16,10 +16,14 @@ func (g *Game) createMutagens() {
 			continue
 		}
 		var e *entity.Entity
-		if rand.Intn(100) < 50 {
+		v := rand.Intn(100)
+		switch {
+		case v < 1*100/3:
 			e = entity.ParseMutagen("./data/mutagens/eyes_increased_vision.json")
-		} else {
+		case v < 2*100/3:
 			e = entity.ParseMutagen("./data/mutagens/core_inventory.json")
+		default:
+			e = entity.ParseMutagen("./data/mutagens/eyes_xray.json")
 		}
 		if e != nil {
 			e.Position = p

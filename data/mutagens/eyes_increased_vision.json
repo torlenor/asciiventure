@@ -1,19 +1,17 @@
 {
     "Name": "Increased Vision Mutagen",
     "Glyph": {
-        "Char": "I",
+        "Char": "v",
         "Color": {
-            "R": 255,
-            "G": 100,
+            "R": 100,
+            "G": 255,
             "B": 100
         }
     },
     "Mutagen": {
         "IsMutagen": true,
-        "Type": "IncreasedVision",
+        "Effect": "IncreasedVision",
         "Category": "Eyes",
-        "Activatable": true,
-        "CooldownTurns": 10,
-        "ActiveTurns": 10
+        "Data": 10
     }
 }

@@ -20,11 +20,10 @@ func ParseMutagen(filename string) *Entity {
 
 	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
 	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable}
 	if data.Mutagen.IsMutagen {
-		if t, err := components.MutationTypeFromString(data.Mutagen.Type); err == nil {
+		if t, err := components.MutationEffectFromString(data.Mutagen.Type); err == nil {
 			if c, err := components.MutationCategoryFromString(data.Mutagen.Category); err == nil {
-				e.Mutations = append(e.Mutations, components.Mutation{Type: t, Category: c, Activatable: data.Mutagen.Activatable, CooldownTurns: data.Mutagen.CooldownTurns, ActiveTurns: data.Mutagen.ActiveTurns, Ready: true})
+				e.Mutation = &components.Mutation{Effect: t, Category: c, Data: data.Mutagen.Data}
 			} else {
 				log.Printf("%s", err)
 				return nil
