@@ -41,7 +41,6 @@ func (g *Game) setupWindow() {
 }
 
 func (g *Game) setupRenderer() {
-	// renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC|sdl.RENDERER_ACCELERATED)
 	renderer, err := sdl.CreateRenderer(g.window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		log.Fatalf("Failed to create renderer: %s", err)
@@ -65,6 +64,5 @@ func (g *Game) setupGame() {
 	g.loadGameMapsFromDirectory("./assets/rooms")
 	g.selectGameMap(1)
 
-	g.updateCharacterWindow()
 	g.logWindow.SetText([]string{"Welcome to Lala's Quest.", "You are a young cat out hunting for mice."})
 }

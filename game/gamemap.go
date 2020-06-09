@@ -63,27 +63,8 @@ func (g *Game) selectGameMap(r int) {
 	g.logWindow.SetText([]string{})
 
 	g.focusPlayer()
-	g.updateCharacterWindow()
-	g.updateInventory()
-	g.updateMutationsPane()
+	g.updateUI()
 }
-
-// func (g *Game) preRenderGameMap() {
-// 	var err error
-// 	g.mapTexture, err = g.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888,
-// 		sdl.TEXTUREACCESS_TARGET, int(screenWidth/g.renderScale), int(screenHeight/g.renderScale))
-// 	if err != nil {
-// 		log.Printf("Error creating texture: %s", err)
-// 	}
-// 	err = g.renderer.SetRenderTarget(g.mapTexture)
-// 	g.renderer.Clear()
-// 	if err != nil {
-// 		log.Printf("Error setting texture as render target: %s", err)
-// 	}
-// 	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
-// 	g.renderer.Present()
-// 	g.renderer.SetRenderTarget(nil)
-// }
 
 func (g *Game) focusPlayer() {
 	g.renderer.OriginX = -g.player.Position.X + int(screenWidth/latticeDX/2/g.renderScale)

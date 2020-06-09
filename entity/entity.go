@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"fmt"
+
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/fov"
 )
@@ -45,10 +47,33 @@ func NewEntity(name string, char string, color components.ColorRGB, initPosition
 	}
 }
 
-// Move moves the entity by (dy,dy).
-func (e *Entity) Move(dx, dy int) {
-	e.Position.X += dx
-	e.Position.Y += dy
+func (e *Entity) PickUp(target *Entity) (result []ActionResult) {
+	if target.Item != nil {
+		if target.Item.CanPickup {
+			if e.Mutations.Has(components.MutationEffectInventory) {
+				e.Inventory = append(e.Inventory, target)
+				result = append(result, ActionResult{Type: ActionResultItemPickedUp})
+				result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s picked up %s.", e.Name, target.Name)})
+			} else {
+				result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("You are a cat, you cannot pick up things (or can you?).")})
+			}
+		}
+	}
+	return
+}
+
+func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
+	if target.Mutation != nil {
+		if !e.Mutations.Has(target.Mutation.Effect) {
+			e.Mutations = append(e.Mutations, *target.Mutation)
+			result = append(result, ActionResult{Type: ActionResultMutationConsumed})
+			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s gained mutation %s.", e.Name, target.Name)})
+		} else {
+			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s already has %s.", e.Name, target.Name)})
+		}
+	}
+
+	return
 }
 
 // MoveTo moves the entity to (y,y).
@@ -56,7 +81,7 @@ func (e *Entity) MoveTo(p components.Position) {
 	e.Position = p
 }
 
-func (e *Entity) Attack(target *Entity) (results []components.CombatResult) {
+func (e *Entity) Attack(target *Entity) (results []CombatResult) {
 	if target.Combat == nil {
 		return
 	}
@@ -65,7 +90,7 @@ func (e *Entity) Attack(target *Entity) (results []components.CombatResult) {
 	if dmg < 0 {
 		dmg = 0
 	}
-	results = append(results, components.CombatResult{Type: components.TakeDamage, IntegerValue: dmg})
+	results = append(results, CombatResult{Type: CombatResultTakeDamage, IntegerValue: dmg})
 
 	return
 }

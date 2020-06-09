@@ -250,7 +250,13 @@ func (g *Game) draw() {
 }
 
 func (g *Game) updateCharacterWindow() {
-	g.characterWindow.SetText([]string{fmt.Sprintf("Time: %d", g.time), fmt.Sprintf("HP: %d/%d", g.player.Combat.CurrentHP, g.player.Combat.HP)})
+	g.characterWindow.SetText([]string{
+		fmt.Sprintf("Time: %d", g.time),
+		fmt.Sprintf("HP: %d/%d", g.player.Combat.CurrentHP, g.player.Combat.HP),
+		fmt.Sprintf("Vision: %d", g.player.VisibilityRange+g.player.Mutations.GetData(components.MutationEffectIncreasedVision)),
+		fmt.Sprintf("Power %d", g.player.Combat.Power),
+		fmt.Sprintf("Defense %d", g.player.Combat.Defense),
+	})
 }
 
 func (g *Game) timestep() {
@@ -258,12 +264,12 @@ func (g *Game) timestep() {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
 		g.updateFoVs()
-		g.time++
-		g.updateCharacterWindow()
-		g.updateInventory()
-		g.updateMutationsPane()
 		g.statusBar.SetText([]string{})
+
+		g.time++
 		g.nextStep = false
+
+		g.updateUI()
 	}
 }
 
@@ -275,42 +281,4 @@ func (g *Game) updateFoVs() {
 			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position, false)
 		}
 	}
-}
-
-func (g *Game) updateStatusBar() {
-	g.statusBar.Clear()
-	for _, e := range g.entities {
-		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) && e != g.player {
-			if e.Dead {
-				g.statusBar.AddRow(e.Name + "(Dead)")
-			} else {
-				if e.Item != nil {
-					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
-				} else if e.Mutation != nil {
-					g.statusBar.AddRow(e.Mutation.String() + ": " + e.Mutation.GetDescription())
-				} else {
-					g.statusBar.AddRow(e.Name)
-				}
-			}
-			return
-		}
-	}
-	g.statusBar.Clear()
-}
-
-func (g *Game) updateMutationsPane() {
-	g.mutations.Clear()
-	if len(g.player.Mutations) == 0 {
-		g.mutations.AddRow("No mutations")
-		return
-	}
-	g.mutations.AddRow("Mutations:")
-	g.mutations.AddRow("----------------")
-	for _, m := range g.player.Mutations {
-		g.mutations.AddRow(fmt.Sprintf("%s", m))
-	}
-}
-
-func (g *Game) updateInventory() {
-	g.inventory.UpdateInventory(g.player.Inventory)
 }
