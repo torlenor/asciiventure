@@ -53,9 +53,6 @@ func (g *Game) setupRenderer() {
 	g.renderer = renderers.NewRenderer(renderer)
 	g.renderer.GlyphWidth = latticeDX
 	g.renderer.GlyphHeight = latticeDY
-
-	// g.renderer.OriginY = int(g.characterWindowRect.H/latticeDY) + 1
-	g.renderer.OriginY = 0
 }
 
 func (g *Game) setupGame() {

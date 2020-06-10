@@ -2,7 +2,6 @@ package game
 
 import (
 	"log"
-	"math/rand"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -45,7 +44,6 @@ type Game struct {
 
 	currentGameMap *gamemap.GameMap
 	loadedGameMaps []*gamemap.GameMap
-	mapTexture     *sdl.Texture
 
 	mouseTileX int
 	mouseTileY int
@@ -97,7 +95,6 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 // Shutdown should be called when the program quits.
 func (g *Game) Shutdown() {
 	g.glyphTexture.Destroy()
-	g.mapTexture.Destroy()
 
 	g.defaultFont.Close()
 	g.renderer.Destroy()
@@ -115,16 +112,11 @@ func (g *Game) createGlyphTexture() {
 }
 
 func (g *Game) createPlayer() {
-	if gl, ok := g.glyphTexture.Get("@"); ok {
-		gl.Color = utils.ColorRGB{R: 0, G: 128, B: 255}
-		e := entity.NewEntity("Player", "@", utils.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
-		e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
-		e.VisibilityRange = 20
-		g.entities = append(g.entities, e)
-		g.player = e
-	} else {
-		log.Printf("Unable to add player entity")
-	}
+	e := entity.NewEntity("Player", "@", utils.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
+	e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
+	e.VisibilityRange = 20
+	g.entities = append(g.entities, e)
+	g.player = e
 }
 
 func (g *Game) createEnemy(name string, char string, color utils.ColorRGB, p components.Position) *entity.Entity {
@@ -141,31 +133,6 @@ func (g *Game) Occupied(p components.Position) bool {
 		}
 	}
 	return false
-}
-
-func (g *Game) createEnemyEntities() {
-	maxx, maxy := g.currentGameMap.Dimensions()
-	for i := 0; i < 5; i++ {
-		p := components.Position{X: rand.Intn(maxx), Y: rand.Intn(maxy)}
-		if g.Occupied(p) || !g.currentGameMap.Empty(p.X, p.Y) {
-			continue
-		}
-		var e *entity.Entity
-		if rand.Intn(100) < 50 {
-			e = g.createMouse()
-
-		} else {
-			e = g.createDog()
-		}
-		if e != nil {
-			e.Position = p
-			e.InitialPosition = p
-			e.TargetPosition = p
-			g.entities = append(g.entities, e)
-		} else {
-			log.Printf("Error creating Mouse entity")
-		}
-	}
 }
 
 func (g *Game) renderChar(char string, color utils.ColorRGB, p components.Position) {
@@ -207,8 +174,6 @@ func (g *Game) draw() {
 	g.renderer.SetScale(g.renderScale, g.renderScale)
 	g.renderer.Clear()
 
-	// g.renderer.Copy(g.mapTexture, nil, &sdl.Rect{X: 0, Y: 0, W: int(screenWidth / g.renderScale), H: int(screenHeight / g.renderScale)})
-	// We are actually rendering it in total again because of FoV updates and some flickering which we encountered when pre-rendering
 	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
 	g.renderEntities()
 	if g.gameState != gameOver {

@@ -6,7 +6,7 @@
 
 .PHONY: update clean build build-all test authors dist vendor build-container-latest \
 build-container-tagged build-container-gitcommit release-container release-container-gitcommit \
-run
+run runf
 
 NAME := asciiventure
 BINARIES := ${NAME}
@@ -144,3 +144,6 @@ release-container-gitcommit: build-container-gitcommit
 
 run: build
 	./bin/${NAME}
+
+runf: build
+	./bin/${NAME} -f
