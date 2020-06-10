@@ -85,6 +85,7 @@ func (ui *UI) Render() {
 	}
 }
 
+// SetStatusBarText sets a new text in the status bar.
 func (ui *UI) SetStatusBarText(text string) {
 	if len(text) == 0 {
 		ui.statusBar.Clear()
@@ -93,10 +94,17 @@ func (ui *UI) SetStatusBarText(text string) {
 	}
 }
 
-func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP int32) {
-	ui.characterWindow.SetText([]string{fmt.Sprintf("Time: %d", time), fmt.Sprintf("HP: %d/%d", currentHP, totalHP)})
+// UpdateCharacterPane updates the character infos with the information provided.
+func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP, power, defense int32) {
+	ui.characterWindow.SetText([]string{
+		fmt.Sprintf("Time: %d", time),
+		fmt.Sprintf("HP: %d/%d", currentHP, totalHP),
+		fmt.Sprintf("Power %d", power),
+		fmt.Sprintf("Defense %d", defense),
+	})
 }
 
+// UpdateMutationsPane updates the mutation info with the newly provided list.
 func (ui *UI) UpdateMutationsPane(mutations components.Mutations) {
 	ui.mutations.Clear()
 	if len(mutations) == 0 {
@@ -110,14 +118,17 @@ func (ui *UI) UpdateMutationsPane(mutations components.Mutations) {
 	}
 }
 
+// UpdateInventoryPane updates the inventory info with the newly provided list.
 func (ui *UI) UpdateInventoryPane(inventory []*entity.Entity) {
 	ui.inventory.UpdateInventory(inventory)
 }
 
+// SetInventoryPaneEnabled shows or hides the inventory.
 func (ui *UI) SetInventoryPaneEnabled(enabled bool) {
 	ui.inventoryEnabled = enabled
 }
 
+// AddLogEntry adds a new entry to the log pane.
 func (ui *UI) AddLogEntry(text string) {
 	ui.logWindow.AddRow(text)
 }

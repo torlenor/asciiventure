@@ -33,7 +33,7 @@ type InventoryWidget struct {
 	drawBorder bool
 }
 
-// NewTextWidget returns a new NewInventoryWidget
+// NewInventoryWidget returns a new NewInventoryWidget
 func NewInventoryWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, drawBorder bool) *InventoryWidget {
 	return &InventoryWidget{
 		renderer:         r,
@@ -46,14 +46,13 @@ func NewInventoryWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, dr
 	}
 }
 
-// AddRow adds a new line of text.
-// If number of lines > max lines, the oldest will be removed.
+// UpdateInventory updates the inventory with the new list of entities.
 func (w *InventoryWidget) UpdateInventory(items []*entity.Entity) {
 	w.inventoryEntries = inventoryEntries{}
 	for _, item := range items {
 		w.inventoryEntries[item.Name]++
 	}
-	w.createTexure()
+	w.createTexture()
 }
 
 // SetWrapLength defines a new wrap length on how many pixel the text should be wrapped automatically.
@@ -71,7 +70,7 @@ func getJoinedInventoryText(r inventoryEntries) string {
 	return strings.Join(lines, "\n")
 }
 
-func (w *InventoryWidget) createTexure() {
+func (w *InventoryWidget) createTexture() {
 	text := "Inventory\n--------------------\n"
 	text += getJoinedInventoryText(w.inventoryEntries)
 	surface, err := w.font.RenderUTF8BlendedWrapped(text, sdl.Color{R: 255, G: 255, B: 255, A: 255}, w.wrapLength)
@@ -103,7 +102,6 @@ func (w *InventoryWidget) Render() {
 	cr, cg, cb, ca, _ := r.GetDrawColor()
 	var bm sdl.BlendMode
 	r.GetDrawBlendMode(&bm)
-	// clipRect := r.GetRenderer().GetClipRect()
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.SetDrawColor(0, 0, 0, 255)
 	r.SetClipRect(w.dst)

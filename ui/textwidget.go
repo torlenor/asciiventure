@@ -62,7 +62,7 @@ func (w *TextWidget) AddRow(row string) {
 	if len(w.textRows) > w.maxRows {
 		w.textRows = w.textRows[1:]
 	}
-	w.createTexure()
+	w.createTexture()
 }
 
 // SetWrapLength defines a new wrap length on how many pixel the text should be wrapped automatically.
@@ -76,7 +76,7 @@ func (w *TextWidget) SetText(rows []string) {
 	for _, s := range rows {
 		w.textRows = append(w.textRows, rowEntry{text: s, count: 1})
 	}
-	w.createTexure()
+	w.createTexture()
 }
 
 func getText(r rowEntry) string {
@@ -94,7 +94,7 @@ func getJoinedText(r []rowEntry) string {
 	return strings.Join(lines, "\n")
 }
 
-func (w *TextWidget) createTexure() {
+func (w *TextWidget) createTexture() {
 	if len(w.textRows) == 0 {
 		return
 	}
@@ -127,7 +127,6 @@ func (w *TextWidget) Render() {
 	cr, cg, cb, ca, _ := r.GetDrawColor()
 	var bm sdl.BlendMode
 	r.GetDrawBlendMode(&bm)
-	// clipRect := r.GetRenderer().GetClipRect()
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.SetDrawColor(0, 0, 0, 255)
 	r.SetClipRect(w.dst)
@@ -152,6 +151,7 @@ func (w *TextWidget) Render() {
 	r.SetClipRect(nil)
 }
 
+// Clear clears the content of the TextWidget.
 func (w *TextWidget) Clear() {
 	w.SetText([]string{})
 }
