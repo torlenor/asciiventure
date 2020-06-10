@@ -10,16 +10,18 @@ import (
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/renderers"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 const (
 	emptyChar = "·"
 )
 
-var foregroundColorEmptyDot = components.ColorRGB{R: 220, G: 220, B: 220}
-var foregroundColorWallVisible = components.ColorRGB{R: 200, G: 200, B: 200}
-var foregroundColorNotVisible = components.ColorRGB{R: 80, G: 80, B: 100}
-var foregroundColorEmptyDotNotVisible = components.ColorRGB{R: 40, G: 40, B: 40}
+var foregroundColorEmptyDot = utils.ColorRGB{R: 220, G: 220, B: 220}
+var foregroundColorWallVisible = utils.ColorRGB{R: 200, G: 200, B: 200}
+var foregroundColorNotVisible = utils.ColorRGB{R: 80, G: 80, B: 100}
+var foregroundColorEmptyDotNotVisible = utils.ColorRGB{R: 40, G: 40, B: 40}
 
 // GameMap holds the data of a game map
 type GameMap struct {
@@ -28,7 +30,7 @@ type GameMap struct {
 
 	SpawnPoint components.Position
 
-	notSeenGlyph components.Glyph
+	notSeenGlyph renderers.Glyph
 }
 
 // NewGameMapFromString constructs a room from the provided room description string
@@ -68,7 +70,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				c = " "
 			}
 
-			var foregroundColor components.ColorRGB
+			var foregroundColor utils.ColorRGB
 			if c == " " {
 				c = "·"
 				foregroundColor = foregroundColorEmptyDot
@@ -86,7 +88,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 	room.T = glyphTexture
 
 	room.notSeenGlyph, _ = room.T.Get("#")
-	room.notSeenGlyph.Color = components.ColorRGB{
+	room.notSeenGlyph.Color = utils.ColorRGB{
 		R: 20,
 		G: 20,
 		B: 20,

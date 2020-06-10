@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 // ParseMutagen parses a mutagen description and returns the corresponding entity.
@@ -18,7 +19,7 @@ func ParseMutagen(filename string) *Entity {
 		log.Printf("Error parsing mutagen file %s: %s", filename, err)
 	}
 
-	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
+	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
 	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
 	if data.Mutagen.IsMutagen {
 		if t, err := components.MutationEffectFromString(data.Mutagen.Type); err == nil {

@@ -3,7 +3,7 @@ package renderers
 import (
 	"log"
 
-	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -77,7 +77,7 @@ func (r *Renderer) RenderWithOffset(t *sdl.Texture, src *sdl.Rect, cx, cy, w, h,
 }
 
 // RenderGlyph renders a glyph at the given character coordinate
-func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int) {
+func (r *Renderer) RenderGlyph(g Glyph, cx, cy int) {
 	err := g.T.SetColorMod(g.Color.R, g.Color.G, g.Color.B)
 	if err != nil {
 		log.Printf("Error setting Color in RenderGlyph: %s", err)
@@ -86,7 +86,7 @@ func (r *Renderer) RenderGlyph(g components.Glyph, cx, cy int) {
 }
 
 // FillCharCoordinate Draws a rectangle completely filling the given char coordinate
-func (r *Renderer) FillCharCoordinate(cx, cy int, c components.ColorRGBA) {
+func (r *Renderer) FillCharCoordinate(cx, cy int, c utils.ColorRGBA) {
 	cr, cg, cb, ca, _ := r.renderer.GetDrawColor()
 	var bm sdl.BlendMode
 	r.renderer.GetDrawBlendMode(&bm)

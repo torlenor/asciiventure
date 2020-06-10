@@ -1,4 +1,4 @@
-package components
+package utils
 
 type ColorRGB struct {
 	R uint8

@@ -22,9 +22,9 @@ func (g *Game) renderMouseTile() {
 		for _, p := range path {
 			notEmpty := !g.currentGameMap.Empty(p.X, p.Y) && g.player.FoV.Visible(p)
 			_, blocked := g.blocked(p.X, p.Y)
-			color := components.ColorRGBA{R: 100, G: 100, B: 255, A: 64}
+			color := utils.ColorRGBA{R: 100, G: 100, B: 255, A: 64}
 			if notEmpty || blocked {
-				color = components.ColorRGBA{R: 255, G: 80, B: 80, A: 100}
+				color = utils.ColorRGBA{R: 255, G: 80, B: 80, A: 100}
 			}
 			g.renderer.FillCharCoordinate(p.X, p.Y, color)
 			if notEmpty || blocked {
@@ -33,6 +33,6 @@ func (g *Game) renderMouseTile() {
 		}
 	}
 
-	color := components.ColorRGBA{R: 128, G: 128, B: 128, A: 120}
+	color := utils.ColorRGBA{R: 128, G: 128, B: 128, A: 120}
 	g.renderer.FillCharCoordinate(g.mouseTileX, g.mouseTileY, color)
 }

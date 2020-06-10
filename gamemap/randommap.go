@@ -62,7 +62,7 @@ Loop:
 	gameMap.T = glyphTexture
 
 	gameMap.notSeenGlyph, _ = gameMap.T.Get("#")
-	gameMap.notSeenGlyph.Color = components.ColorRGB{
+	gameMap.notSeenGlyph.Color = utils.ColorRGB{
 		R: 20,
 		G: 20,
 		B: 20,

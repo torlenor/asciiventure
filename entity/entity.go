@@ -5,6 +5,7 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/fov"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 // Entity defines an entity in our entity-component system
@@ -12,7 +13,7 @@ type Entity struct {
 	Name string
 
 	Char  string
-	Color components.ColorRGB
+	Color utils.ColorRGB
 
 	InitialPosition components.Position
 	Position        components.Position
@@ -35,7 +36,7 @@ type Entity struct {
 }
 
 // NewEntity creates a new unique entity.
-func NewEntity(name string, char string, color components.ColorRGB, initPosition components.Position, blocks bool) *Entity {
+func NewEntity(name string, char string, color utils.ColorRGB, initPosition components.Position, blocks bool) *Entity {
 	return &Entity{
 		Name:            name,
 		Char:            char,

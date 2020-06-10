@@ -12,6 +12,7 @@ import (
 	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/ui"
+	"github.com/torlenor/asciiventure/utils"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -139,8 +140,8 @@ func (g *Game) createGlyphTexture() {
 
 func (g *Game) createPlayer() {
 	if gl, ok := g.glyphTexture.Get("@"); ok {
-		gl.Color = components.ColorRGB{R: 0, G: 128, B: 255}
-		e := entity.NewEntity("Player", "@", components.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
+		gl.Color = utils.ColorRGB{R: 0, G: 128, B: 255}
+		e := entity.NewEntity("Player", "@", utils.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
 		e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
 		e.VisibilityRange = 20
 		g.entities = append(g.entities, e)
@@ -150,7 +151,7 @@ func (g *Game) createPlayer() {
 	}
 }
 
-func (g *Game) createEnemy(name string, char string, color components.ColorRGB, p components.Position) *entity.Entity {
+func (g *Game) createEnemy(name string, char string, color utils.ColorRGB, p components.Position) *entity.Entity {
 	e := entity.NewEntity(name, char, color, p, true)
 	e.TargetPosition = p
 	return e
@@ -191,7 +192,7 @@ func (g *Game) createEnemyEntities() {
 	}
 }
 
-func (g *Game) renderChar(char string, color components.ColorRGB, p components.Position) {
+func (g *Game) renderChar(char string, color utils.ColorRGB, p components.Position) {
 	if gl, ok := g.glyphTexture.Get(char); ok {
 		gl.Color = color
 		g.renderer.RenderGlyph(gl, p.X, p.Y)
@@ -202,7 +203,7 @@ func (g *Game) renderChar(char string, color components.ColorRGB, p components.P
 
 func (g *Game) renderEntity(e *entity.Entity) {
 	if e.Dead {
-		g.renderChar("%", components.ColorRGB{R: 150, G: 150, B: 150}, e.Position)
+		g.renderChar("%", utils.ColorRGB{R: 150, G: 150, B: 150}, e.Position)
 	} else {
 		g.renderChar(e.Char, e.Color, e.Position)
 	}

@@ -1,13 +1,13 @@
 package gamemap
 
-import "github.com/torlenor/asciiventure/components"
+import "github.com/torlenor/asciiventure/utils"
 
 // Tile is one segment on a game map
 type Tile struct {
 	Char string
 
-	ForegroundColor components.ColorRGB
-	BackgroundColor components.ColorRGBA
+	ForegroundColor utils.ColorRGB
+	BackgroundColor utils.ColorRGBA
 
 	Opaque bool
 }

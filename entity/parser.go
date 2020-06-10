@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 type EntityData struct {
@@ -52,7 +53,7 @@ func ParseMonster(filename string) *Entity {
 		log.Printf("Error parsing monster file %s: %s", filename, err)
 	}
 
-	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
+	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
 	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
 	e.Combat = &components.Combat{CurrentHP: data.Combat.HP, HP: data.Combat.HP, Power: data.Combat.Power, Defense: data.Combat.Defense}
 	e.AI = &components.AI{AttackRange: data.AI.AttackRange, AttackRangeUntil: data.AI.AttackRangeUntil}
@@ -71,7 +72,7 @@ func ParseItem(filename string) *Entity {
 		log.Printf("Error parsing item file %s: %s", filename, err)
 	}
 
-	color := components.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
+	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
 	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
 	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable}
 

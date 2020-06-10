@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/renderers"
+	"github.com/torlenor/asciiventure/utils"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -78,14 +78,14 @@ func NewGlyphTexture(renderer *renderers.Renderer, imagePath string, description
 
 // Get returns a glyph with Dst set to render at origin (0,0).
 // Returns true as second value if the operation was successfull.
-func (g *GlyphTexture) Get(c string) (components.Glyph, bool) {
+func (g *GlyphTexture) Get(c string) (renderers.Glyph, bool) {
 	if a, ok := g.glyphCharSet.Characters[c]; ok {
-		return components.Glyph{T: g.t, Src: &sdl.Rect{X: int32(a.X), Y: int32(a.Y), W: int32(a.Width), H: int32(a.Height)},
+		return renderers.Glyph{T: g.t, Src: &sdl.Rect{X: int32(a.X), Y: int32(a.Y), W: int32(a.Width), H: int32(a.Height)},
 			OffsetX: a.OriginX, OffsetY: a.OriginY,
 			Width: a.Width, Height: a.Height,
-			Color: components.ColorRGB{R: 255, G: 255, B: 255}}, true
+			Color: utils.ColorRGB{R: 255, G: 255, B: 255}}, true
 	}
-	return components.Glyph{}, false
+	return renderers.Glyph{}, false
 }
 
 // Destroy the GlyphTexture (do not use it afterwards)
