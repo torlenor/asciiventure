@@ -27,8 +27,13 @@ func (g *Game) setupWindow() {
 		log.Fatalf("Failed to initialize sdl: %s", err)
 	}
 
-	g.window, err = sdl.CreateWindow(windowName, sdl.WINDOWPOS_CENTERED,
-		sdl.WINDOWPOS_CENTERED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
+	if g.fullscreen {
+		g.window, err = sdl.CreateWindow(windowName, 0,
+			0, 0, 0, sdl.WINDOW_SHOWN|sdl.WINDOW_FULLSCREEN_DESKTOP)
+	} else {
+		g.window, err = sdl.CreateWindow(windowName, sdl.WINDOWPOS_CENTERED,
+			sdl.WINDOWPOS_CENTERED, int32(g.screenWidth), int32(g.screenHeight), sdl.WINDOW_SHOWN)
+	}
 	if err != nil {
 		log.Fatalf("Failed to create window: %s", err)
 	}
@@ -49,7 +54,8 @@ func (g *Game) setupRenderer() {
 	g.renderer.GlyphWidth = latticeDX
 	g.renderer.GlyphHeight = latticeDY
 
-	g.renderer.OriginY = int(characterWindowRect.H/latticeDY) + 1
+	// g.renderer.OriginY = int(g.characterWindowRect.H/latticeDY) + 1
+	g.renderer.OriginY = 0
 }
 
 func (g *Game) setupGame() {
@@ -64,5 +70,7 @@ func (g *Game) setupGame() {
 	g.loadGameMapsFromDirectory("./assets/rooms")
 	g.selectGameMap(1)
 
-	g.logWindow.SetText([]string{"Welcome to Lala's Quest.", "You are a young cat out hunting for mice."})
+	g.updateCharacterWindow()
+	g.ui.AddLogEntry("Welcome to Lala's Quest.")
+	g.ui.AddLogEntry("You are a young cat out hunting for mice.")
 }

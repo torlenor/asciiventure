@@ -1,8 +1,6 @@
 package game
 
 import (
-	"fmt"
-
 	"github.com/torlenor/asciiventure/components"
 )
 
@@ -13,39 +11,30 @@ func (g *Game) updateUI() {
 }
 
 func (g *Game) updateStatusBar() {
-	g.statusBar.Clear()
 	for _, e := range g.entities {
 		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) && e != g.player {
 			if e.Dead {
-				g.statusBar.AddRow(e.Name + "(Dead)")
+				g.ui.SetStatusBarText(e.Name + "(Dead)")
 			} else {
 				if e.Item != nil {
-					g.statusBar.AddRow(e.Name + ": Pick up item with 'g'")
+					g.ui.SetStatusBarText(e.Name + ": Pick up item with 'g'")
 				} else if e.Mutation != nil {
-					g.statusBar.AddRow(e.Mutation.String() + ": " + e.Mutation.GetDescription())
+					g.ui.SetStatusBarText(e.Mutation.String() + ": " + e.Mutation.GetDescription())
 				} else {
-					g.statusBar.AddRow(e.Name)
+					g.ui.SetStatusBarText(e.Name)
 				}
 			}
 			return
 		}
 	}
-	g.statusBar.Clear()
+	g.ui.SetStatusBarText("")
 }
 
 func (g *Game) updateMutationsPane() {
-	g.mutations.Clear()
-	if len(g.player.Mutations) == 0 {
-		g.mutations.AddRow("No mutations")
-		return
-	}
-	g.mutations.AddRow("Mutations:")
-	g.mutations.AddRow("----------------")
-	for _, m := range g.player.Mutations {
-		g.mutations.AddRow(fmt.Sprintf("%s", m))
-	}
+	g.ui.SetInventoryPaneEnabled(g.player.Mutations.Has(components.MutationEffectInventory))
+	g.ui.UpdateMutationsPane(g.player.Mutations)
 }
 
 func (g *Game) updateInventoryPane() {
-	g.inventory.UpdateInventory(g.player.Inventory)
+	g.ui.UpdateInventoryPane(g.player.Inventory)
 }

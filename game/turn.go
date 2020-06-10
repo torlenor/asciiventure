@@ -21,7 +21,7 @@ func (g *Game) blocked(x, y int) (*entity.Entity, bool) {
 func (g *Game) killEntity(e *entity.Entity) {
 	e.Blocks = false
 	e.Dead = true
-	g.logWindow.AddRow(fmt.Sprintf("%s is dead.", e.Name))
+	g.ui.AddLogEntry(fmt.Sprintf("%s is dead.", e.Name))
 }
 
 func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
@@ -29,7 +29,7 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 	for _, result := range results {
 		if result.Type == entity.CombatResultTakeDamage {
 			target.Combat.CurrentHP -= result.IntegerValue
-			g.logWindow.AddRow(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Combat.CurrentHP, target.Combat.HP))
+			g.ui.AddLogEntry(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Combat.CurrentHP, target.Combat.HP))
 			if target.Combat.CurrentHP <= 0 {
 				g.killEntity(target)
 				if target == g.player {

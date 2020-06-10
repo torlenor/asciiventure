@@ -14,7 +14,7 @@ func (g *Game) performAction() {
 					// Remove the entity from global list as it is now in the inventory
 					g.entities[i] = nil
 				case entity.ActionResultMessage:
-					g.logWindow.AddRow(r.StringValue)
+					g.ui.AddLogEntry(r.StringValue)
 				}
 			}
 
@@ -25,7 +25,7 @@ func (g *Game) performAction() {
 					// Remove the entity from global list as it is now in the inventory
 					g.entities[i] = nil
 				case entity.ActionResultMessage:
-					g.logWindow.AddRow(r.StringValue)
+					g.ui.AddLogEntry(r.StringValue)
 				}
 			}
 		}

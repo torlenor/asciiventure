@@ -1,9 +1,11 @@
 package game
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
+
+	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
@@ -13,49 +15,25 @@ import (
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/ui"
 	"github.com/torlenor/asciiventure/utils"
-	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/ttf"
 )
 
-// TODO: Some of these consts should be made configurable
 const (
 	windowName = "Asciiventure"
 
 	fontPath = "./assets/fonts/RobotoMono-Regular.ttf"
 	fontSize = 16
 
-	screenWidth  = 1900
-	screenHeight = 1024
-
 	latticeDX = 19
 	latticeDY = 32
-)
-
-type gameState int
-
-const (
-	playersTurn gameState = iota
-	enemyTurn
-	gameOver
-)
-
-func (d gameState) String() string {
-	return [...]string{"playersTurn", "enemyTurn", "gameOver"}[d]
-}
-
-var (
-	roomRenderPane      = sdl.Rect{X: screenHeight / 6, Y: 0, W: screenWidth, H: screenHeight - screenHeight/6}
-	characterWindowRect = sdl.Rect{X: 0, Y: 0, W: screenWidth / 2, H: screenHeight / 6}
-	logWindowRect       = sdl.Rect{X: screenWidth - screenWidth/2 - 1, Y: 0, W: screenWidth/2 + 1, H: screenHeight / 6}
-	statusBarRec        = sdl.Rect{X: 0, Y: screenHeight - fontSize - 16 - 1, W: screenWidth, H: fontSize + 16}
-
-	mutationsRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: screenHeight/6 - 1, W: screenWidth / 4, H: 3*screenHeight/6 + 1}
-	inventoryRect = sdl.Rect{X: screenWidth - screenWidth/4, Y: 4*screenHeight/6 - 1, W: screenWidth / 4, H: 2*screenHeight/6 - statusBarRec.H + 1}
 )
 
 // Game is the main struct of the game
 type Game struct {
 	quit bool
+
+	screenWidth  int
+	screenHeight int
+	fullscreen   bool
 
 	window   *sdl.Window
 	renderer *renderers.Renderer
@@ -82,40 +60,29 @@ type Game struct {
 	nextStep  bool
 	gameState gameState
 
-	// UI
-	characterWindow *ui.TextWidget
-	logWindow       *ui.TextWidget
-	statusBar       *ui.TextWidget
-	mutations       *ui.TextWidget
-	inventory       *ui.InventoryWidget
+	ui *ui.UI
 }
 
 // Setup should be called first after creating an instance of Game.
-func (g *Game) Setup() {
+func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 	log.Printf("Setting up game...")
 	g.renderScale = 0.8
+
+	g.screenWidth = windowWidth
+	g.screenHeight = windowHeight
+	g.fullscreen = fullscreen
 
 	g.setupWindow()
 	g.setupRenderer()
 
+	g.ui = ui.NewUI(g.renderer, g.defaultFont, fontSize)
+	g.ui.SetScreenDimensions(g.screenWidth, g.screenHeight)
+
 	g.gameState = playersTurn
-
-	g.characterWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &characterWindowRect, true)
-	g.characterWindow.SetWrapLength(int(characterWindowRect.W - 8))
-	g.logWindow = ui.NewTextWidget(g.renderer, g.defaultFont, &logWindowRect, true)
-	g.logWindow.SetWrapLength(int(logWindowRect.W - 8))
-	g.statusBar = ui.NewTextWidget(g.renderer, g.defaultFont, &statusBarRec, true)
-	g.statusBar.SetWrapLength(int(statusBarRec.W - 8))
-
-	g.mutations = ui.NewTextWidget(g.renderer, g.defaultFont, &mutationsRect, true)
-	g.mutations.SetWrapLength(int(mutationsRect.W - 8))
-	g.mutations.AddRow("No mutations")
-	g.inventory = ui.NewInventoryWidget(g.renderer, g.defaultFont, &inventoryRect, true)
-	g.inventory.SetWrapLength(int(inventoryRect.W - 8))
 
 	g.setupGame()
 	log.Printf("Done setting up game")
-	g.statusBar.AddRow("Done setting up game")
+	g.ui.SetStatusBarText("Done setting up game")
 }
 
 // Shutdown should be called when the program quits.
@@ -238,26 +205,16 @@ func (g *Game) draw() {
 	if g.gameState != gameOver {
 		g.renderMouseTile()
 	}
+
 	g.renderer.SetScale(1, 1)
-	g.characterWindow.Render()
-	g.logWindow.Render()
-	g.statusBar.Render()
-	g.mutations.Render()
-	if g.player.Mutations.Has(components.MutationEffectInventory) {
-		g.inventory.Render()
-	}
+	g.ui.Render()
 
 	g.renderer.Present()
 }
 
 func (g *Game) updateCharacterWindow() {
-	g.characterWindow.SetText([]string{
-		fmt.Sprintf("Time: %d", g.time),
-		fmt.Sprintf("HP: %d/%d", g.player.Combat.CurrentHP, g.player.Combat.HP),
-		fmt.Sprintf("Vision: %d", g.player.VisibilityRange+g.player.Mutations.GetData(components.MutationEffectIncreasedVision)),
-		fmt.Sprintf("Power %d", g.player.Combat.Power),
-		fmt.Sprintf("Defense %d", g.player.Combat.Defense),
-	})
+	// TODO: Add Vision, Power, Defense
+	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP)
 }
 
 func (g *Game) timestep() {
@@ -265,11 +222,11 @@ func (g *Game) timestep() {
 		g.updatePositions(playersTurn)
 		g.updatePositions(enemyTurn)
 		g.updateFoVs()
-		g.statusBar.SetText([]string{})
 
 		g.time++
 		g.nextStep = false
 
+		g.ui.SetStatusBarText("")
 		g.updateUI()
 	}
 }
