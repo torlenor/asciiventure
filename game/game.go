@@ -75,6 +75,15 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 	g.setupWindow()
 	g.setupRenderer()
 
+	if fullscreen {
+		dm, err := sdl.GetCurrentDisplayMode(0)
+		if err != nil {
+			log.Fatalf("Cannot get current display mode: %s", err)
+		}
+		g.screenWidth = int(dm.W)
+		g.screenHeight = int(dm.H)
+	}
+
 	g.ui = ui.NewUI(g.renderer, g.defaultFont, fontSize)
 	g.ui.SetScreenDimensions(g.screenWidth, g.screenHeight)
 
