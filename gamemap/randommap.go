@@ -19,7 +19,7 @@ func NewRandomMap(maxRooms int, roomMinSize, roomMaxSize, mapWidth, mapHeight in
 		}
 		for x := int(0); x < mapWidth; x++ {
 			foregroundColor := foregroundColorWallVisible
-			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "#", Opaque: true, ForegroundColor: foregroundColor}
+			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "#", Opaque: true, Blocking: true, ForegroundColor: foregroundColor}
 		}
 	}
 
@@ -59,6 +59,14 @@ Loop:
 		rooms = append(rooms, newRoom)
 	}
 
+	mapChangeX, mapChangeY := rooms[len(rooms)-1].center()
+	gameMap.MapChangePoint = components.Position{X: mapChangeX, Y: mapChangeY}
+	gameMap.Tiles[int(mapChangeY)][int(mapChangeX)] = Tile{Char: "+",
+		Opaque:          false,
+		Blocking:        false,
+		ForegroundColor: utils.ColorRGB{R: 255, G: 255, B: 0},
+	}
+
 	gameMap.T = glyphTexture
 
 	gameMap.notSeenGlyph, _ = gameMap.T.Get("#")
@@ -78,7 +86,7 @@ func createRoom(gameMap *GameMap, room rect) {
 		}
 		for x := room.x1 + 1; x < room.x2; x++ {
 			foregroundColor := foregroundColorEmptyDot
-			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
+			gameMap.Tiles[int(y)][int(x)] = Tile{Char: "·", Opaque: false, Blocking: false, ForegroundColor: foregroundColor}
 		}
 	}
 }
@@ -86,13 +94,13 @@ func createRoom(gameMap *GameMap, room rect) {
 func createHTunnel(gameMap *GameMap, x1, x2, y int) {
 	for x := utils.MinInt(x1, x2); x < utils.MaxInt(x1, x2)+1; x++ {
 		foregroundColor := foregroundColorEmptyDot
-		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
+		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, Blocking: false, ForegroundColor: foregroundColor}
 	}
 }
 
 func createVTunnel(gameMap *GameMap, y1, y2, x int) {
 	for y := utils.MinInt(y1, y2); y < utils.MaxInt(y1, y2)+1; y++ {
 		foregroundColor := foregroundColorEmptyDot
-		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, ForegroundColor: foregroundColor}
+		gameMap.Tiles[y][x] = Tile{Char: "·", Opaque: false, Blocking: false, ForegroundColor: foregroundColor}
 	}
 }

@@ -95,10 +95,11 @@ func (ui *UI) SetStatusBarText(text string) {
 }
 
 // UpdateCharacterPane updates the character infos with the information provided.
-func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP, power, defense int32) {
+func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP, vision, power, defense int32) {
 	ui.characterWindow.SetText([]string{
 		fmt.Sprintf("Time: %d", time),
 		fmt.Sprintf("HP: %d/%d", currentHP, totalHP),
+		fmt.Sprintf("Vision: %d", vision),
 		fmt.Sprintf("Power %d", power),
 		fmt.Sprintf("Defense %d", defense),
 	})

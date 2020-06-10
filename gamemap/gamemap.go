@@ -28,7 +28,8 @@ type GameMap struct {
 	T     *assets.GlyphTexture
 	Tiles map[int]map[int]Tile
 
-	SpawnPoint components.Position
+	SpawnPoint     components.Position
+	MapChangePoint components.Position
 
 	notSeenGlyph renderers.Glyph
 }
@@ -53,6 +54,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 		Tiles: make(map[int]map[int]Tile),
 	}
 	spawnPointSet := false
+	mapChangePointSet := false
 	for y, l := range lines {
 		room.Tiles[int(y)] = make(map[int]Tile)
 		cntX := -1
@@ -63,10 +65,17 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 			if c == "@" {
 				if spawnPointSet {
 					log.Printf("Warning: Player spawn point defined more than once")
-					c = " "
 				}
 				room.SpawnPoint = components.Position{X: int(x), Y: int(y)}
 				spawnPointSet = true
+				c = " "
+			}
+			if c == "+" {
+				if mapChangePointSet {
+					log.Printf("Warning: Map change point defined more than once")
+				}
+				room.MapChangePoint = components.Position{X: int(x), Y: int(y)}
+				mapChangePointSet = true
 				c = " "
 			}
 
@@ -78,10 +87,12 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				foregroundColor = foregroundColorWallVisible
 			}
 			opaque := false
+			blocking := false
 			if c == "#" {
 				opaque = true
+				blocking = true
 			}
-			room.Tiles[int(y)][int(x)] = Tile{Char: c, Opaque: opaque, ForegroundColor: foregroundColor}
+			room.Tiles[int(y)][int(x)] = Tile{Char: c, Opaque: opaque, Blocking: blocking, ForegroundColor: foregroundColor}
 		}
 	}
 
@@ -114,7 +125,7 @@ func (r *GameMap) Empty(x, y int) bool {
 
 	if y, ok := r.Tiles[y]; ok {
 		if x, ok := y[x]; ok {
-			if x.Char != emptyChar {
+			if x.Blocking {
 				return false
 			}
 		}
@@ -165,4 +176,12 @@ func (r *GameMap) Neighbors(p components.Position) []components.Position {
 	}
 
 	return neighbors
+}
+
+// IsPortal returns true if the location is a portal to another map.
+func (r *GameMap) IsPortal(p components.Position) bool {
+	if p.Equal(r.MapChangePoint) {
+		return true
+	}
+	return false
 }

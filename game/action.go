@@ -38,4 +38,8 @@ func (g *Game) performAction() {
 		}
 	}
 	g.entities = g.entities[:n]
+
+	if g.currentGameMap.IsPortal(g.player.Position) {
+		g.selectGameMap(g.currentGamMapID + 1)
+	}
 }

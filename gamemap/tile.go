@@ -9,5 +9,6 @@ type Tile struct {
 	ForegroundColor utils.ColorRGB
 	BackgroundColor utils.ColorRGBA
 
-	Opaque bool
+	Opaque   bool
+	Blocking bool
 }

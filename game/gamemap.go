@@ -44,6 +44,7 @@ func (g *Game) selectGameMap(r int) {
 	if len(g.loadedGameMaps) == 0 {
 		log.Fatalf("No maps loaded")
 	}
+	g.currentGamMapID = r
 	r--
 	if r < 0 || r >= len(g.loadedGameMaps) {
 		return

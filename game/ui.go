@@ -27,7 +27,11 @@ func (g *Game) updateStatusBar() {
 			return
 		}
 	}
-	g.ui.SetStatusBarText("")
+	if g.currentGameMap.IsPortal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) {
+		g.ui.SetStatusBarText("Stairs to next map. Press 'g' to use them.")
+	} else {
+		g.ui.SetStatusBarText("")
+	}
 }
 
 func (g *Game) updateMutationsPane() {

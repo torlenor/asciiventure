@@ -42,8 +42,9 @@ type Game struct {
 	defaultFont  *ttf.Font
 	glyphTexture *assets.GlyphTexture
 
-	currentGameMap *gamemap.GameMap
-	loadedGameMaps []*gamemap.GameMap
+	currentGameMap  *gamemap.GameMap
+	currentGamMapID int
+	loadedGameMaps  []*gamemap.GameMap
 
 	mouseTileX int
 	mouseTileY int
@@ -187,8 +188,7 @@ func (g *Game) draw() {
 }
 
 func (g *Game) updateCharacterWindow() {
-	// TODO: Add Vision, Power, Defense
-	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, g.player.Combat.Power, g.player.Combat.Defense)
+	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, int32(g.player.VisibilityRange), g.player.Combat.Power, g.player.Combat.Defense)
 }
 
 func (g *Game) timestep() {
