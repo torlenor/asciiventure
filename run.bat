@@ -1,3 +1,3 @@
 @echo off
 go build .\cmd\asciiventure
-.\asciiventure.exe
+.\asciiventure.exe %*
