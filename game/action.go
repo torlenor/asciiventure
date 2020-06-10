@@ -7,11 +7,11 @@ import (
 func (g *Game) performAction() {
 	for i, e := range g.entities {
 		if e.Position.Equal(g.player.Position) && e != g.player {
-			result := g.player.PickUp(e)
+			result := g.player.PickUpItem(e)
 			for _, r := range result {
 				switch r.Type {
 				case entity.ActionResultItemPickedUp:
-					// Remove the entity from global list as it is now in the inventory
+					// Remove the item entity from global list as it is now in the inventory of the player
 					g.entities[i] = nil
 				case entity.ActionResultMessage:
 					g.ui.AddLogEntry(r.StringValue)
@@ -22,7 +22,7 @@ func (g *Game) performAction() {
 			for _, r := range result {
 				switch r.Type {
 				case entity.ActionResultMutationConsumed:
-					// Remove the entity from global list as it is now in the inventory
+					// Remove the mutation entity from global list as it is was consumed by the player
 					g.entities[i] = nil
 				case entity.ActionResultMessage:
 					g.ui.AddLogEntry(r.StringValue)

@@ -48,7 +48,8 @@ func NewEntity(name string, char string, color utils.ColorRGB, initPosition comp
 	}
 }
 
-func (e *Entity) PickUp(target *Entity) (result []ActionResult) {
+// PickUpItem picks up an item defined in target and adds it to the inventory of e.
+func (e *Entity) PickUpItem(target *Entity) (result []ActionResult) {
 	if target.Item != nil {
 		if target.Item.CanPickup {
 			if e.Mutations.Has(components.MutationEffectInventory) {
@@ -63,11 +64,12 @@ func (e *Entity) PickUp(target *Entity) (result []ActionResult) {
 	return
 }
 
+// ConsumeMutation takes the mutation defined in target and adds it to e.
 func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
 	if target.Mutation != nil {
 		if !e.Mutations.Has(target.Mutation.Effect) {
 			e.Mutations = append(e.Mutations, *target.Mutation)
-			result = append(result, ActionResult{Type: ActionResultMutationConsumed})
+			result = append(result, ActionResult{Type: ActionResultMutationConsumed, MutationEffectValue: target.Mutation.Effect})
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s gained mutation %s.", e.Name, target.Name)})
 		} else {
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s already has %s.", e.Name, target.Name)})
