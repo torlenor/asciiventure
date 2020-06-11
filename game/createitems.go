@@ -22,7 +22,7 @@ func (g *Game) createItems() {
 			continue
 		}
 		if e != nil {
-			e.Position = p
+			e.Position = &p
 			e.InitialPosition = p
 			e.TargetPosition = p
 			e.Blocks = false

@@ -42,7 +42,7 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 
 func (g *Game) updatePositions(state gameState) {
 	for _, e := range g.entities {
-		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.Dead {
+		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.Dead || e.Position == nil {
 			continue
 		}
 		var newPosition components.Position
@@ -55,17 +55,17 @@ func (g *Game) updatePositions(state gameState) {
 		} else {
 			if e.AI != nil {
 				var path []components.Position
-				if g.currentGameMap.Distance(g.player.Position, e.InitialPosition) <= float64(e.AI.AttackRange) && g.currentGameMap.Distance(e.Position, e.InitialPosition) <= float64(e.AI.AttackRangeUntil) {
-					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, g.player.Position)
+				if g.currentGameMap.Distance(*g.player.Position, e.InitialPosition) <= float64(e.AI.AttackRange) && g.currentGameMap.Distance(*e.Position, e.InitialPosition) <= float64(e.AI.AttackRangeUntil) {
+					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, *e.Position, *g.player.Position)
 				} else {
-					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position, e.InitialPosition)
+					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, *e.Position, e.InitialPosition)
 				}
 				if len(path) > 0 {
 					newPosition = path[0]
 				}
 			}
 		}
-		if newPosition.Equal(e.Position) {
+		if newPosition.Equal(*e.Position) {
 			continue
 		}
 		roomEmpty := g.currentGameMap.Empty(newPosition.X, newPosition.Y)
@@ -80,11 +80,11 @@ func (g *Game) updatePositions(state gameState) {
 		} else if blocked {
 			if e.Combat != nil && blockingE.Combat != nil && !(e != g.player && blockingE != g.player) {
 				g.combat(e, blockingE)
-				e.TargetPosition = e.Position
+				e.TargetPosition = *e.Position
 				g.movementPath = []components.Position{}
 			}
 		} else if !roomEmpty {
-			e.TargetPosition = e.Position
+			e.TargetPosition = *e.Position
 		}
 	}
 	if state == playersTurn {

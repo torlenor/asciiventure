@@ -129,7 +129,7 @@ func (g *Game) createEnemy(name string, char string, color utils.ColorRGB, p com
 // Occupied returns true if the given tile is occupied by a blocking entity and if the tile is currently visible.
 func (g *Game) Occupied(p components.Position) bool {
 	for _, e := range g.entities {
-		if e.Position.X == p.X && e.Position.Y == p.Y && e.Blocks && g.player.FoV.Seen(p) && g.player.FoV.Visible(p) {
+		if e.Position != nil && e.Position.X == p.X && e.Position.Y == p.Y && e.Blocks && g.player.FoV.Seen(p) && g.player.FoV.Visible(p) {
 			return true
 		}
 	}
@@ -146,19 +146,21 @@ func (g *Game) renderChar(char string, color utils.ColorRGB, p components.Positi
 }
 
 func (g *Game) renderEntity(e *entity.Entity) {
-	if e.Dead {
-		g.renderChar("%", utils.ColorRGB{R: 150, G: 150, B: 150}, e.Position)
-	} else {
-		g.renderChar(e.Char, e.Color, e.Position)
+	if e.Position != nil {
+		if e.Dead {
+			g.renderChar("%", utils.ColorRGB{R: 150, G: 150, B: 150}, *e.Position)
+		} else {
+			g.renderChar(e.Char, e.Color, *e.Position)
+		}
 	}
 }
 
 func (g *Game) renderEntities() {
 	for _, e := range g.entities {
-		if e == g.player || (e.Position.X == g.player.Position.X && e.Position.Y == g.player.Position.Y) {
+		if e == g.player || e.Position == nil || (e.Position.X == g.player.Position.X && e.Position.Y == g.player.Position.Y) {
 			continue
 		}
-		if g.player.FoV.Visible(e.Position) {
+		if g.player.FoV.Visible(*e.Position) {
 			g.renderEntity(e)
 		}
 	}
@@ -207,10 +209,13 @@ func (g *Game) timestep() {
 
 func (g *Game) updateFoVs() {
 	for _, e := range g.entities {
+		if e.Position == nil {
+			continue
+		}
 		if e.Mutations.Has(components.MutationEffectXRay) {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position, true)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, true)
 		} else {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position, false)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, false)
 		}
 	}
 }

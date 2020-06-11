@@ -16,13 +16,13 @@ type Entity struct {
 	Color utils.ColorRGB
 
 	InitialPosition components.Position
-	Position        components.Position
 	TargetPosition  components.Position
 
 	Combat   *components.Combat
 	AI       *components.AI
 	Item     *components.Item
 	Mutation *components.Mutation
+	Position *components.Position
 
 	Blocks bool
 	Dead   bool
@@ -41,7 +41,7 @@ func NewEntity(name string, char string, color utils.ColorRGB, initPosition comp
 		Name:            name,
 		Char:            char,
 		Color:           color,
-		Position:        initPosition,
+		Position:        &initPosition,
 		Blocks:          blocks,
 		FoV:             make(fov.FoVMap),
 		InitialPosition: initPosition,
@@ -54,6 +54,7 @@ func (e *Entity) PickUpItem(target *Entity) (result []ActionResult) {
 		if target.Item.CanPickup {
 			if e.Mutations.Has(components.MutationEffectInventory) {
 				e.Inventory = append(e.Inventory, target)
+				target.Position = nil
 				result = append(result, ActionResult{Type: ActionResultItemPickedUp})
 				result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s picked up %s.", e.Name, target.Name)})
 			} else {
@@ -64,11 +65,35 @@ func (e *Entity) PickUpItem(target *Entity) (result []ActionResult) {
 	return
 }
 
+// DropItem drops the target item if it is in the inventory.
+func (e *Entity) DropItem(target *Entity) (result []ActionResult) {
+	if target.Item != nil {
+		for i, item := range e.Inventory {
+			if item == target {
+				target.Position = &components.Position{X: e.Position.X, Y: e.Position.Y}
+				e.Inventory[i] = nil
+				result = append(result, ActionResult{Type: ActionResultItemDropped})
+				result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("Item %s dropped.", target.Name)})
+			}
+		}
+	}
+	n := 0
+	for _, e := range e.Inventory {
+		if e != nil {
+			e.Inventory[n] = e
+			n++
+		}
+	}
+	e.Inventory = e.Inventory[:n]
+	return
+}
+
 // ConsumeMutation takes the mutation defined in target and adds it to e.
 func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
 	if target.Mutation != nil {
 		if !e.Mutations.Has(target.Mutation.Effect) {
 			e.Mutations = append(e.Mutations, *target.Mutation)
+			target.Position = nil
 			result = append(result, ActionResult{Type: ActionResultMutationConsumed, MutationEffectValue: target.Mutation.Effect})
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s gained mutation %s.", e.Name, target.Name)})
 		} else {
@@ -81,7 +106,8 @@ func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
 
 // MoveTo moves the entity to (y,y).
 func (e *Entity) MoveTo(p components.Position) {
-	e.Position = p
+	e.Position.X = p.X
+	e.Position.Y = p.Y
 }
 
 func (e *Entity) Attack(target *Entity) (results []CombatResult) {

@@ -54,8 +54,8 @@ func (g *Game) selectGameMap(r int) {
 
 	g.player.FoV.ClearSeen()
 	g.entities = []*entity.Entity{g.player}
-	g.player.Position = components.Position{X: (g.currentGameMap.SpawnPoint.X), Y: g.currentGameMap.SpawnPoint.Y}
-	g.player.TargetPosition = g.player.Position
+	g.player.Position = &components.Position{X: (g.currentGameMap.SpawnPoint.X), Y: g.currentGameMap.SpawnPoint.Y}
+	g.player.TargetPosition = *g.player.Position
 	g.createEnemyEntities()
 	g.createItems()
 	g.createMutagens()

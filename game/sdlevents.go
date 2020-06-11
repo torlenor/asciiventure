@@ -52,7 +52,7 @@ func (g *Game) handleSDLEvents() {
 						g.renderer.OriginY += 2
 					} else {
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 					}
@@ -62,7 +62,7 @@ func (g *Game) handleSDLEvents() {
 						g.renderer.OriginY -= 2
 					} else {
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 					}
@@ -72,7 +72,7 @@ func (g *Game) handleSDLEvents() {
 						g.renderer.OriginX += 2
 					} else {
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.nextStep = true
 					}
@@ -82,7 +82,7 @@ func (g *Game) handleSDLEvents() {
 						g.renderer.OriginX -= 2
 					} else {
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.nextStep = true
 					}
@@ -120,60 +120,63 @@ func (g *Game) handleSDLEvents() {
 					// b	j	n
 					case "y":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "k":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "u":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.player.TargetPosition.Y = g.player.Position.Y - 1
 						g.nextStep = true
 						continue
 					case "h":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.nextStep = true
 						continue
 					case "l":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.nextStep = true
 						continue
 					case "b":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X - 1
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
 					case "j":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
 					case "n":
 						g.movementPath = []components.Position{}
-						g.player.TargetPosition = g.player.Position
+						g.player.TargetPosition = *g.player.Position
 						g.player.TargetPosition.X = g.player.Position.X + 1
 						g.player.TargetPosition.Y = g.player.Position.Y + 1
 						g.nextStep = true
 						continue
 					case "g":
 						// TODO: This should not be done here but in turn for player
-						g.performAction()
-						g.nextStep = true
+						g.performAction(actionTypeInteract)
+						continue
+					case "d":
+						// TODO: This should not be done here but in turn for player
+						g.performAction(actionTypeDropItem)
 						continue
 					}
 				}

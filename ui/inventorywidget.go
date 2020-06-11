@@ -50,7 +50,9 @@ func NewInventoryWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, dr
 func (w *InventoryWidget) UpdateInventory(items []*entity.Entity) {
 	w.inventoryEntries = inventoryEntries{}
 	for _, item := range items {
-		w.inventoryEntries[item.Name]++
+		if item != nil {
+			w.inventoryEntries[item.Name]++
+		}
 	}
 	w.createTexture()
 }
@@ -62,9 +64,11 @@ func (w *InventoryWidget) SetWrapLength(wrapLength int) {
 
 func getJoinedInventoryText(r inventoryEntries) string {
 	var lines []string
+	cnt := 0
 	for name, count := range r {
+		cnt++
 		if count > 0 {
-			lines = append(lines, fmt.Sprintf("%dx %s", count, name))
+			lines = append(lines, fmt.Sprintf("%d) %dx %s", cnt, count, name))
 		}
 	}
 	return strings.Join(lines, "\n")

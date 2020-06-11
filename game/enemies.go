@@ -23,7 +23,7 @@ func (g *Game) createEnemyEntities() {
 			e = g.createDog()
 		}
 		if e != nil {
-			e.Position = p
+			e.Position = &p
 			e.InitialPosition = p
 			e.TargetPosition = p
 			g.entities = append(g.entities, e)
