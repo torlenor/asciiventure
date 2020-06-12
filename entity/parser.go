@@ -9,7 +9,7 @@ import (
 	"github.com/torlenor/asciiventure/utils"
 )
 
-type EntityData struct {
+type entityData struct {
 	Name  string `json:"Name"`
 	Glyph struct {
 		Char  string `json:"Char"`
@@ -20,9 +20,9 @@ type EntityData struct {
 		} `json:"Color"`
 	} `json:"Glyph"`
 	Combat struct {
-		HP      int32 `json:"HP"`
-		Defense int32 `json:"Defense"`
-		Power   int32 `json:"Power"`
+		HP      int `json:"HP"`
+		Defense int `json:"Defense"`
+		Power   int `json:"Power"`
 	} `json:"Combat"`
 	AI struct {
 		AttackRange      int `json:"AttackRange"`
@@ -32,12 +32,14 @@ type EntityData struct {
 		Range int `json:"Range"`
 	} `json:"Vision"`
 	Item struct {
-		CanPickup  bool `json:"CanPickup"`
-		Consumable bool `json:"Consumable"`
+		CanPickup  bool   `json:"CanPickup"`
+		Consumable bool   `json:"Consumable"`
+		Effect     string `json:"Effect"`
+		Data       int    `json:"Data"`
 	} `json:"Item"`
 	Mutagen struct {
 		IsMutagen bool   `json:"IsMutagen"`
-		Type      string `json:"Effect"`
+		Effect    string `json:"Effect"`
 		Category  string `json:"Category"`
 		Data      int    `json:"Data"`
 	} `json:"Mutagen"`
@@ -46,7 +48,7 @@ type EntityData struct {
 // ParseMonster parses a monster description and returns the corresponding entity.
 func ParseMonster(filename string) *Entity {
 	file, _ := ioutil.ReadFile(filename)
-	data := EntityData{}
+	data := entityData{}
 
 	err := json.Unmarshal([]byte(file), &data)
 	if err != nil {
@@ -65,16 +67,21 @@ func ParseMonster(filename string) *Entity {
 // ParseItem parses a item description and returns the corresponding entity.
 func ParseItem(filename string) *Entity {
 	file, _ := ioutil.ReadFile(filename)
-	data := EntityData{}
+	data := entityData{}
 
 	err := json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Printf("Error parsing item file %s: %s", filename, err)
 	}
 
-	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
-	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-	e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable}
+	var eff components.ItemEffect
+	if eff, err = components.ItemEffectFromString(data.Item.Effect); err == nil {
+		color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
+		e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
+		e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable, Effect: eff, Data: data.Item.Data}
+		return e
+	}
 
-	return e
+	log.Printf("%s", err)
+	return nil
 }

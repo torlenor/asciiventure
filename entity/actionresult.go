@@ -10,12 +10,13 @@ const (
 	ActionResultUnknown ActionResultType = iota
 	ActionResultItemPickedUp
 	ActionResultItemDropped
+	ActionResultItemUsed
 	ActionResultMutationConsumed
 	ActionResultMessage
 )
 
 func (d ActionResultType) String() string {
-	return [...]string{"Unknown", "ItemPickedUp", "ItemDropped", "MutationConsumed", "Message"}[d]
+	return [...]string{"Unknown", "ItemPickedUp", "ItemDropped", "ItemUsed", "MutationConsumed", "Message"}[d]
 }
 
 // ActionResult is the result of an action.

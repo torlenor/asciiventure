@@ -92,6 +92,12 @@ func (g *Game) handleSDLEvents() {
 
 			keyCode := t.Keysym.Sym
 
+			if keyCode >= sdl.K_F1 && keyCode <= sdl.K_F12 && t.State == sdl.PRESSED {
+				val := keyCode - sdl.K_F1 + 1
+				g.selectGameMap(int(val))
+				continue
+			}
+
 			if keyCode < 10000 {
 				if t.State == sdl.PRESSED {
 					if keyCode == sdl.K_SPACE {
@@ -101,8 +107,9 @@ func (g *Game) handleSDLEvents() {
 
 					k := string(keyCode)
 					if keyCode >= '0' && keyCode <= '9' {
-						r, _ := strconv.Atoi(k)
-						g.selectGameMap(r)
+						val, _ := strconv.Atoi(k)
+						g.performPlayerAction(components.ActionTypeUseItem, val-1)
+						g.nextStep = true
 						continue
 					}
 
@@ -171,12 +178,12 @@ func (g *Game) handleSDLEvents() {
 						g.nextStep = true
 						continue
 					case "g":
-						// TODO: This should not be done here but in turn for player
-						g.performAction(actionTypeInteract)
+						g.performPlayerAction(components.ActionTypeInteract, 0)
+						g.nextStep = true
 						continue
 					case "d":
-						// TODO: This should not be done here but in turn for player
-						g.performAction(actionTypeDropItem)
+						g.performPlayerAction(components.ActionTypeDropItem, 0)
+						g.nextStep = true
 						continue
 					}
 				}

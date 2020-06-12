@@ -95,7 +95,7 @@ func (ui *UI) SetStatusBarText(text string) {
 }
 
 // UpdateCharacterPane updates the character infos with the information provided.
-func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP, vision, power, defense int32) {
+func (ui *UI) UpdateCharacterPane(time uint, currentHP, totalHP, vision, power, defense int) {
 	ui.characterWindow.SetText([]string{
 		fmt.Sprintf("Time: %d", time),
 		fmt.Sprintf("HP: %d/%d", currentHP, totalHP),
@@ -120,7 +120,7 @@ func (ui *UI) UpdateMutationsPane(mutations components.Mutations) {
 }
 
 // UpdateInventoryPane updates the inventory info with the newly provided list.
-func (ui *UI) UpdateInventoryPane(inventory []*entity.Entity) {
+func (ui *UI) UpdateInventoryPane(inventory *entity.Inventory) {
 	ui.inventory.UpdateInventory(inventory)
 }
 

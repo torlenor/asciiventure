@@ -22,7 +22,7 @@ type InventoryWidget struct {
 	border *sdl.Texture
 	text   *sdl.Texture
 
-	inventoryEntries inventoryEntries
+	inventoryEntries []string
 
 	textW int32
 	textH int32
@@ -36,23 +36,20 @@ type InventoryWidget struct {
 // NewInventoryWidget returns a new NewInventoryWidget
 func NewInventoryWidget(r *renderers.Renderer, font *ttf.Font, dst *sdl.Rect, drawBorder bool) *InventoryWidget {
 	return &InventoryWidget{
-		renderer:         r,
-		font:             font,
-		dst:              dst,
-		wrapLength:       1000,
-		maxRows:          int(dst.H) / font.Height(),
-		drawBorder:       drawBorder,
-		inventoryEntries: make(inventoryEntries),
+		renderer:   r,
+		font:       font,
+		dst:        dst,
+		wrapLength: 1000,
+		maxRows:    int(dst.H) / font.Height(),
+		drawBorder: drawBorder,
 	}
 }
 
 // UpdateInventory updates the inventory with the new list of entities.
-func (w *InventoryWidget) UpdateInventory(items []*entity.Entity) {
-	w.inventoryEntries = inventoryEntries{}
-	for _, item := range items {
-		if item != nil {
-			w.inventoryEntries[item.Name]++
-		}
+func (w *InventoryWidget) UpdateInventory(inventory *entity.Inventory) {
+	w.inventoryEntries = []string{}
+	for _, item := range inventory.GetInventoryList() {
+		w.inventoryEntries = append(w.inventoryEntries, item)
 	}
 	w.createTexture()
 }
@@ -62,14 +59,12 @@ func (w *InventoryWidget) SetWrapLength(wrapLength int) {
 	w.wrapLength = wrapLength
 }
 
-func getJoinedInventoryText(r inventoryEntries) string {
+func getJoinedInventoryText(r []string) string {
 	var lines []string
 	cnt := 0
-	for name, count := range r {
+	for _, name := range r {
 		cnt++
-		if count > 0 {
-			lines = append(lines, fmt.Sprintf("%d) %dx %s", cnt, count, name))
-		}
+		lines = append(lines, fmt.Sprintf("%d) %s", cnt, name))
 	}
 	return strings.Join(lines, "\n")
 }

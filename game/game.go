@@ -190,7 +190,7 @@ func (g *Game) draw() {
 }
 
 func (g *Game) updateCharacterWindow() {
-	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, int32(g.player.VisibilityRange), g.player.Combat.Power, g.player.Combat.Defense)
+	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, g.player.VisibilityRange, g.player.Combat.Power, g.player.Combat.Defense)
 }
 
 func (g *Game) timestep() {

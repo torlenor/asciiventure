@@ -1,7 +1,7 @@
 {
     "Name": "Healing Potion",
     "Glyph": {
-        "Char": "!",
+        "Char": "h",
         "Color": {
             "R": 255,
             "G": 255,
@@ -10,6 +10,8 @@
     },
     "Item": {
         "CanPickup": true,
-        "Consumable": true
+        "Consumable": true,
+        "Effect": "healing",
+        "Data": 5
     }
 }

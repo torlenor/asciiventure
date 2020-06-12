@@ -12,6 +12,9 @@ func (g *Game) updateUI() {
 
 func (g *Game) updateStatusBar() {
 	for _, e := range g.entities {
+		if e == nil || e.Position == nil {
+			continue
+		}
 		if e.Position.Equal(components.Position{X: g.mouseTileX, Y: g.mouseTileY}) && e != g.player {
 			if e.Dead {
 				g.ui.SetStatusBarText(e.Name + "(Dead)")
