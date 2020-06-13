@@ -28,6 +28,8 @@ const (
 
 // Game is the main struct of the game
 type Game struct {
+	debug bool
+
 	quit bool
 
 	screenWidth  int
@@ -59,12 +61,15 @@ type Game struct {
 	nextStep  bool
 	gameState gameState
 
-	ui *ui.UI
+	ui             *ui.UI
+	commandManager *commandManager
 }
 
 // Setup should be called first after creating an instance of Game.
 func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 	log.Printf("Setting up game...")
+	g.debug = true
+
 	g.renderScale = 0.8
 
 	g.screenWidth = windowWidth
@@ -88,6 +93,7 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 
 	g.gameState = playersTurn
 
+	g.setupInput()
 	g.setupGame()
 	log.Printf("Done setting up game")
 	g.ui.SetStatusBarText("Done setting up game")
