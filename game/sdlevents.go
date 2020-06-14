@@ -9,19 +9,13 @@ type keyboardEvent struct {
 
 func (g *Game) handleSDLEvents() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch t := event.(type) {
+		switch event.(type) {
 		case *sdl.KeyboardEvent:
 			g.commandManager.DispatchCommand(event)
 		case *sdl.MouseMotionEvent:
-			g.updateMouseTile(int(t.X), int(t.Y))
+			g.commandManager.DispatchMouseCommand(event)
 		case *sdl.MouseButtonEvent:
-			if t.State == sdl.PRESSED {
-				switch t.Button {
-				case sdl.BUTTON_LEFT:
-					g.setTargetPosition(g.mouseTileX, g.mouseTileY)
-				case sdl.BUTTON_RIGHT:
-				}
-			}
+			g.commandManager.DispatchMouseCommand(event)
 		}
 	}
 }

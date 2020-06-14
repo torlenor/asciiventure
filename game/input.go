@@ -8,6 +8,8 @@ import (
 func (g *Game) setupInput() {
 	g.commandManager = &commandManager{}
 	g.commandManager.RegisterObserver(g)
+	g.commandManager.RegisterMouseObserver(g)
+
 	g.commandManager.RegisterCommand(CommandQuit, "quit", sdl.K_ESCAPE, false, false, false, true)
 
 	g.commandManager.RegisterCommand(CommandMoveN, "move_n", sdl.K_UP, false, false, false, true)
@@ -27,7 +29,7 @@ func (g *Game) setupInput() {
 	g.commandManager.RegisterCommand(CommandMoveSW, "move_sw", int('b'), false, false, false, true)
 	g.commandManager.RegisterCommand(CommandMoveNW, "move_nw", int('y'), false, false, false, true)
 
-	g.commandManager.RegisterCommand(CommandNextTimeStep, "next_timestep", sdl.K_KP_SPACE, false, false, false, true)
+	g.commandManager.RegisterCommand(CommandNextTimeStep, "next_timestep", sdl.K_SPACE, false, false, false, true)
 	g.commandManager.RegisterCommand(CommandZoomIn, "zoom_in", int('+'), false, false, false, true)
 	g.commandManager.RegisterCommand(CommandZoomOut, "zoom_out", int('-'), false, false, false, true)
 	g.commandManager.RegisterCommand(CommandScrollUp, "scroll_up", sdl.K_UP, false, false, true, true)
@@ -176,5 +178,15 @@ func (g *Game) NotifyCommand(command command) {
 		g.selectGameMap(9)
 	case CommandDebugReload:
 		g.loadGameMapsFromDirectory("./assets/rooms")
+	}
+}
+
+// NotifyMouseCommand will be called from commandManager when a mouse event is received.
+func (g *Game) NotifyMouseCommand(buttonLeft, buttonMiddle, buttonRight bool, x, y int32) {
+	if x >= 0 && y >= 0 {
+		g.updateMouseTile(int(x), int(y))
+	}
+	if buttonLeft {
+		g.setTargetPosition(g.mouseTileX, g.mouseTileY)
 	}
 }

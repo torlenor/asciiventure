@@ -54,6 +54,10 @@ type commandObserver interface {
 	NotifyCommand(command)
 }
 
+type mouseObserver interface {
+	NotifyMouseCommand(buttonLeft, buttonMiddle, buttonRight bool, x, y int32)
+}
+
 type registeredCommand struct {
 	command command
 	name    string
@@ -67,6 +71,7 @@ type registeredCommand struct {
 type commandManager struct {
 	registeredCommands []registeredCommand
 	observers          []commandObserver
+	mouseObservers     []mouseObserver
 }
 
 func (c *commandManager) RegisterCommand(command command, name string, key int, shift, ctrl, alt, pressed bool) {
@@ -83,6 +88,46 @@ func (c *commandManager) RegisterCommand(command command, name string, key int, 
 
 func (c *commandManager) RegisterObserver(observer commandObserver) {
 	c.observers = append(c.observers, observer)
+}
+
+func (c *commandManager) RegisterMouseObserver(observer mouseObserver) {
+	c.mouseObservers = append(c.mouseObservers, observer)
+}
+
+func (c *commandManager) DispatchMouseCommand(event sdl.Event) {
+	var buttonLeftPressed bool
+	var buttonRightPressed bool
+	var buttonMiddlePressed bool
+
+	switch t := event.(type) {
+	case *sdl.MouseMotionEvent:
+		if int32(t.State&sdl.ButtonLMask()) > 0 {
+			buttonLeftPressed = true
+		}
+		if int32(t.State&sdl.ButtonRMask()) > 0 {
+			buttonRightPressed = true
+		}
+		if int32(t.State&sdl.ButtonMMask()) > 0 {
+			buttonMiddlePressed = true
+		}
+		for _, observer := range c.mouseObservers {
+			observer.NotifyMouseCommand(buttonLeftPressed, buttonMiddlePressed, buttonRightPressed, t.X, t.Y)
+		}
+	case *sdl.MouseButtonEvent:
+		if t.State == sdl.PRESSED {
+			switch t.Button {
+			case sdl.BUTTON_LEFT:
+				buttonLeftPressed = true
+			case sdl.BUTTON_MIDDLE:
+				buttonMiddlePressed = true
+			case sdl.BUTTON_RIGHT:
+				buttonRightPressed = true
+			}
+		}
+		for _, observer := range c.mouseObservers {
+			observer.NotifyMouseCommand(buttonLeftPressed, buttonMiddlePressed, buttonRightPressed, -1, -1)
+		}
+	}
 }
 
 // DispatchCommand will dispatch the command to its observers if it is registered.
