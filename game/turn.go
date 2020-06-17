@@ -75,6 +75,9 @@ func (g *Game) updatePositions(state gameState) {
 			if e == g.player {
 				if len(g.movementPath) > 0 {
 					g.movementPath = g.movementPath[1:]
+				} else {
+					g.movementPath = []components.Position{}
+					e.TargetPosition = *e.Position
 				}
 			}
 		} else if blocked {
@@ -86,8 +89,5 @@ func (g *Game) updatePositions(state gameState) {
 		} else if !roomEmpty {
 			e.TargetPosition = *e.Position
 		}
-	}
-	if state == playersTurn {
-		g.focusPlayer()
 	}
 }

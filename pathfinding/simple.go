@@ -2,6 +2,7 @@ package pathfinding
 
 import "github.com/torlenor/asciiventure/components"
 
+// DetermineStraightLinePath returns the straightest possible path from start to goal.
 func DetermineStraightLinePath(start components.Position, goal components.Position) []components.Position {
 	current := start
 	s := []components.Position{}

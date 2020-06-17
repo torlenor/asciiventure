@@ -7,12 +7,15 @@ import (
 )
 
 func (g *Game) determinePathPlayerMouse() []components.Position {
-	return pathfinding.DetermineAstarPath(g.currentGameMap, g, components.Position{X: g.player.Position.X, Y: g.player.Position.Y}, components.Position{X: g.mouseTileX, Y: g.mouseTileY})
+	targetX, targetY := g.currentGameMap.GetPositionFromRenderCoordinates(g.mouseTileX, g.mouseTileY)
+	return pathfinding.DetermineAstarPath(g.currentGameMap, g, components.Position{X: g.player.Position.X, Y: g.player.Position.Y}, components.Position{X: int(targetX), Y: int(targetY)})
 }
 
 func (g *Game) updateMouseTile(x, y int) {
-	g.mouseTileX = int((float32(x)+0.5)/latticeDX/g.renderScale) - g.renderer.OriginX
-	g.mouseTileY = int((float32(utils.MaxInt(y, g.screenHeight/6))+0.5)/latticeDY/g.renderScale) - g.renderer.OriginY
+	cx, cy := g.consoleMap.GetTileFromScreenCoordinates(int32(x), int32(y))
+
+	g.mouseTileX = cx
+	g.mouseTileY = cy
 	g.updateStatusBar()
 }
 
@@ -26,7 +29,8 @@ func (g *Game) renderMouseTile() {
 			if notEmpty || blocked {
 				color = utils.ColorRGBA{R: 255, G: 80, B: 80, A: 100}
 			}
-			g.renderer.FillCharCoordinate(p.X, p.Y, color)
+			rx, ry := g.currentGameMap.GetRenderCoordinatesFromPosition(int32(p.X), int32(p.Y))
+			g.consoleMap.SetBackgroundColor(rx, ry, color)
 			if notEmpty || blocked {
 				break
 			}
@@ -34,5 +38,5 @@ func (g *Game) renderMouseTile() {
 	}
 
 	color := utils.ColorRGBA{R: 128, G: 128, B: 128, A: 120}
-	g.renderer.FillCharCoordinate(g.mouseTileX, g.mouseTileY, color)
+	g.consoleMap.SetBackgroundColor(g.mouseTileX, g.mouseTileY, color)
 }

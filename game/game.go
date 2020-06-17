@@ -8,6 +8,7 @@ import (
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/console"
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/fov"
 	"github.com/torlenor/asciiventure/gamemap"
@@ -48,8 +49,8 @@ type Game struct {
 	currentGamMapID int
 	loadedGameMaps  []*gamemap.GameMap
 
-	mouseTileX int
-	mouseTileY int
+	mouseTileX int32
+	mouseTileY int32
 
 	movementPath []components.Position
 
@@ -63,6 +64,8 @@ type Game struct {
 
 	ui             *ui.UI
 	commandManager *commandManager
+
+	consoleMap *console.MatrixConsole
 }
 
 // Setup should be called first after creating an instance of Game.
@@ -70,7 +73,7 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 	log.Printf("Setting up game...")
 	g.debug = true
 
-	g.renderScale = 0.8
+	g.renderScale = 1.0
 
 	g.screenWidth = windowWidth
 	g.screenHeight = windowHeight
@@ -87,6 +90,8 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 		g.screenWidth = int(dm.W)
 		g.screenHeight = int(dm.H)
 	}
+
+	g.setupConsoles()
 
 	g.ui = ui.NewUI(g.renderer, g.defaultFont, fontSize)
 	g.ui.SetScreenDimensions(g.screenWidth, g.screenHeight)
@@ -142,37 +147,6 @@ func (g *Game) Occupied(p components.Position) bool {
 	return false
 }
 
-func (g *Game) renderChar(char string, color utils.ColorRGB, p components.Position) {
-	if gl, ok := g.glyphTexture.Get(char); ok {
-		gl.Color = color
-		g.renderer.RenderGlyph(gl, p.X, p.Y)
-	} else {
-		log.Printf("Unable to render '%s'. Glyph not found.", char)
-	}
-}
-
-func (g *Game) renderEntity(e *entity.Entity) {
-	if e.Position != nil {
-		if e.Dead {
-			g.renderChar("%", utils.ColorRGB{R: 150, G: 150, B: 150}, *e.Position)
-		} else {
-			g.renderChar(e.Char, e.Color, *e.Position)
-		}
-	}
-}
-
-func (g *Game) renderEntities() {
-	for _, e := range g.entities {
-		if e == g.player || e.Position == nil || (e.Position.X == g.player.Position.X && e.Position.Y == g.player.Position.Y) {
-			continue
-		}
-		if g.player.FoV.Visible(*e.Position) {
-			g.renderEntity(e)
-		}
-	}
-	g.renderEntity(g.player)
-}
-
 func (g *Game) setTargetPosition(x, y int) {
 	g.movementPath = g.determinePathPlayerMouse()
 	g.player.TargetPosition = components.Position{X: x, Y: y}
@@ -183,20 +157,17 @@ func (g *Game) draw() {
 	g.renderer.SetScale(g.renderScale, g.renderScale)
 	g.renderer.Clear()
 
-	g.currentGameMap.Render(g.renderer, g.player.FoV, g.renderer.OriginX, g.renderer.OriginY)
-	g.renderEntities()
+	g.consoleMap.Clear()
+	g.currentGameMap.Render(g.consoleMap, g.player.FoV, g.player, g.entities, int32(g.renderer.OriginX), int32(g.renderer.OriginY))
 	if g.gameState != gameOver {
 		g.renderMouseTile()
 	}
+	g.consoleMap.Render()
 
 	g.renderer.SetScale(1, 1)
 	g.ui.Render()
 
 	g.renderer.Present()
-}
-
-func (g *Game) updateCharacterWindow() {
-	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, g.player.VisibilityRange, g.player.Combat.Power, g.player.Combat.Defense)
 }
 
 func (g *Game) timestep() {

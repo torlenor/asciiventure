@@ -10,6 +10,7 @@ import (
 
 	"github.com/torlenor/asciiventure/assets"
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/utils"
 )
@@ -18,20 +19,25 @@ const (
 	emptyChar = "·"
 )
 
-var foregroundColorEmptyDot = utils.ColorRGB{R: 220, G: 220, B: 220}
-var foregroundColorWallVisible = utils.ColorRGB{R: 200, G: 200, B: 200}
-var foregroundColorNotVisible = utils.ColorRGB{R: 80, G: 80, B: 100}
-var foregroundColorEmptyDotNotVisible = utils.ColorRGB{R: 40, G: 40, B: 40}
+var foregroundColorEmptyDot = utils.ColorRGBA{R: 220, G: 220, B: 220, A: 100}
+var foregroundColorWallVisible = utils.ColorRGBA{R: 200, G: 200, B: 200, A: 255}
+var foregroundColorNotVisible = utils.ColorRGBA{R: 80, G: 80, B: 100, A: 255}
+var foregroundColorEmptyDotNotVisible = utils.ColorRGBA{R: 40, G: 40, B: 40, A: 255}
 
 // GameMap holds the data of a game map
 type GameMap struct {
 	T     *assets.GlyphTexture
 	Tiles map[int]map[int]Tile
 
+	Entities *[]*entity.Entity
+
 	SpawnPoint     components.Position
 	MapChangePoint components.Position
 
 	notSeenGlyph renderers.Glyph
+
+	currentOffsetX int32
+	currentOffsetY int32
 }
 
 // NewGameMapFromString constructs a room from the provided room description string
@@ -79,7 +85,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				c = " "
 			}
 
-			var foregroundColor utils.ColorRGB
+			var foregroundColor utils.ColorRGBA
 			if c == " " {
 				c = "·"
 				foregroundColor = foregroundColorEmptyDot
@@ -184,4 +190,26 @@ func (r *GameMap) IsPortal(p components.Position) bool {
 		return true
 	}
 	return false
+}
+
+// GetPositionFromRenderCoordinates returns the position on the game map for the provided tile position.
+// Returns (-1, -1) if the position is outside of the map.
+func (r *GameMap) GetPositionFromRenderCoordinates(x, y int32) (ex, ey int32) {
+	ex = x - r.currentOffsetX
+	ey = y - r.currentOffsetY
+
+	maxX, maxY := r.Dimensions()
+	if ex > int32(maxX) || ey > int32(maxY) {
+		return -1, -1
+	}
+
+	return
+}
+
+// GetRenderCoordinatesFromPosition returns the render position for a position on the game map.
+func (r *GameMap) GetRenderCoordinatesFromPosition(ex, ey int32) (x, y int32) {
+	x = ex + r.currentOffsetX
+	y = ey + r.currentOffsetY
+
+	return
 }

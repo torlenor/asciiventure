@@ -87,31 +87,36 @@ func (c *MatrixConsole) Render() {
 				W: charWidth, H: charHeight,
 			}
 			// Render background
-			err := g.T.SetColorMod(1, 1, 1)
-			if err != nil {
-				log.Printf("Error setting Color in MatrixConsole Render: %s", err)
-			}
-			err = g.T.SetAlphaMod(255)
-			if err != nil {
-				log.Printf("Error setting Alpha in MatrixConsole Render: %s", err)
-			}
 			if g.BackgroundColor.A > 0 {
+				if g.Src != nil {
+					err := g.T.SetColorMod(1, 1, 1)
+					if err != nil {
+						log.Printf("Error setting Color in MatrixConsole Render: %s", err)
+					}
+					err = g.T.SetAlphaMod(255)
+					if err != nil {
+						log.Printf("Error setting Alpha in MatrixConsole Render: %s", err)
+					}
+				}
+
 				c.renderer.GetRenderer().SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 				c.renderer.SetDrawColor(g.BackgroundColor.R, g.BackgroundColor.G, g.BackgroundColor.B, g.BackgroundColor.A)
 				c.renderer.GetRenderer().FillRect(dst)
 			}
 			// Render foreground
-			err = g.T.SetColorMod(g.ForegroundColor.R, g.ForegroundColor.G, g.ForegroundColor.B)
-			if err != nil {
-				log.Printf("Error setting Color in MatrixConsole Render: %s", err)
-			}
-			err = g.T.SetAlphaMod(g.ForegroundColor.A)
-			if err != nil {
-				log.Printf("Error setting Alpha in MatrixConsole Render: %s", err)
-			}
-			err = c.renderer.Copy(g.T, g.Src, dst)
-			if err != nil {
-				log.Printf("Error in RenderWithOffset: %s", err)
+			if g.Src != nil {
+				err := g.T.SetColorMod(g.ForegroundColor.R, g.ForegroundColor.G, g.ForegroundColor.B)
+				if err != nil {
+					log.Printf("Error setting Color in MatrixConsole Render: %s", err)
+				}
+				err = g.T.SetAlphaMod(g.ForegroundColor.A)
+				if err != nil {
+					log.Printf("Error setting Alpha in MatrixConsole Render: %s", err)
+				}
+				err = c.renderer.Copy(g.T, g.Src, dst)
+				if err != nil {
+					log.Printf("Error in RenderWithOffset: %s", err)
+				}
 			}
 		}
 	}
@@ -158,6 +163,16 @@ func (c *MatrixConsole) PutCharColor(x, y int32, char string, foregroundColor ut
 	c.matrix[x][y] = glyph
 }
 
+// SetBackgroundColor sets the background color of a tile to the provided value.
+func (c *MatrixConsole) SetBackgroundColor(x, y int32, backgroundColor utils.ColorRGBA) {
+	if _, ok := c.matrix[x]; !ok {
+		c.matrix[x] = make(map[int32]renderers.RenderGlyph)
+	}
+	glyph := c.matrix[x][y]
+	glyph.BackgroundColor = backgroundColor
+	c.matrix[x][y] = glyph
+}
+
 // HLine draws a horizontal line with length l on the console with the default colors.
 // x: The starting x coordinate, the left-most position being 0.
 // y: The starting y coordinate, the top-most position being 0.
@@ -195,4 +210,28 @@ func (c *MatrixConsole) Border(foregroundColor utils.ColorRGBA, backgroundColor 
 // Clear the console.
 func (c *MatrixConsole) Clear() {
 	c.matrix = make(map[int32]map[int32]renderers.RenderGlyph)
+}
+
+func (c *MatrixConsole) outOfBounds(x, y int32) bool {
+	if x < c.consoleOffsetX || x > c.consoleWidth+c.consoleOffsetX ||
+		y < c.consoleOffsetY || y > c.consoleHeight+c.consoleOffsetY {
+		return true
+	}
+	return false
+}
+
+// GetTileFromScreenCoordinates returns the matching tile from the provided screen coordinates.
+// If there the coordinates are outside of the consoles screen (-1, -1) is returned instead.
+func (c *MatrixConsole) GetTileFromScreenCoordinates(mx, my int32) (x, y int32) {
+	if c.outOfBounds(mx, my) {
+		return -1, -1
+	}
+
+	charWidth := c.tileset.GetCharWidth()
+	charHeight := c.tileset.GetCharHeight()
+
+	x = int32(float32(mx-c.consoleOffsetX)+0.5) / charWidth
+	y = int32(float32(my-c.consoleOffsetY)+0.5) / charHeight
+
+	return
 }

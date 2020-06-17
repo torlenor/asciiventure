@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/torlenor/asciiventure/console"
 	"github.com/torlenor/asciiventure/gamemap"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/veandco/go-sdl2/sdl"
@@ -51,8 +52,19 @@ func (g *Game) setupRenderer() {
 		log.Fatalf("Failed to create renderer: %s", err)
 	}
 	g.renderer = renderers.NewRenderer(renderer)
-	g.renderer.GlyphWidth = latticeDX
-	g.renderer.GlyphHeight = latticeDY
+	// g.renderer.GlyphWidth = latticeDX
+	// g.renderer.GlyphHeight = latticeDY
+}
+
+func (g *Game) setupConsoles() {
+	tileset, err := console.NewFontTileset(g.renderer, "./assets/textures/consolas12x12_gs_tc.png")
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	availableWidth := int32(g.screenWidth - g.screenWidth/5)
+	availableHeight := int32(g.screenHeight - g.screenHeight/6 - 2*16)
+	g.consoleMap = console.NewMatrixConsole(g.renderer, tileset, availableWidth, availableHeight, availableWidth/tileset.GetCharWidth(), availableHeight/tileset.GetCharHeight())
+	g.consoleMap.SetOffset(0, int32(g.screenHeight/6))
 }
 
 func (g *Game) setupGame() {
@@ -67,7 +79,11 @@ func (g *Game) setupGame() {
 	g.loadGameMapsFromDirectory("./assets/rooms")
 	g.selectGameMap(1)
 
-	g.updateCharacterWindow()
+	g.updateUI()
+
+	g.consoleMap.Clear()
+	g.currentGameMap.Render(g.consoleMap, g.player.FoV, g.player, g.entities, int32(g.renderer.OriginX), int32(g.renderer.OriginY))
+
 	g.ui.AddLogEntry("Welcome to Lala's Quest.")
 	g.ui.AddLogEntry("You are a young cat out hunting for mice.")
 }

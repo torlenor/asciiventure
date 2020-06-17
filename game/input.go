@@ -122,10 +122,10 @@ func (g *Game) NotifyCommand(command command) {
 		g.renderer.OriginX -= 2
 	case CommandZoomIn:
 		g.renderScale += 0.1
-		g.focusPlayer()
+		g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
 	case CommandZoomOut:
 		g.renderScale -= 0.1
-		g.focusPlayer()
+		g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
 	case CommandNextTimeStep:
 		g.nextStep = true
 	case CommandInteract:
@@ -187,6 +187,6 @@ func (g *Game) NotifyMouseCommand(buttonLeft, buttonMiddle, buttonRight bool, x,
 		g.updateMouseTile(int(x), int(y))
 	}
 	if buttonLeft {
-		g.setTargetPosition(g.mouseTileX, g.mouseTileY)
+		g.setTargetPosition(int(g.mouseTileX), int(g.mouseTileY))
 	}
 }

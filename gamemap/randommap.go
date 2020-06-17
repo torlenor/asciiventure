@@ -64,7 +64,7 @@ Loop:
 	gameMap.Tiles[int(mapChangeY)][int(mapChangeX)] = Tile{Char: "+",
 		Opaque:          false,
 		Blocking:        false,
-		ForegroundColor: utils.ColorRGB{R: 255, G: 255, B: 0},
+		ForegroundColor: utils.ColorRGBA{R: 255, G: 255, B: 0, A: 255},
 	}
 
 	gameMap.T = glyphTexture
