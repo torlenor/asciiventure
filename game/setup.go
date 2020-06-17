@@ -84,6 +84,6 @@ func (g *Game) setupGame() {
 	g.consoleMap.Clear()
 	g.currentGameMap.Render(g.consoleMap, g.player.FoV, g.player, g.entities, int32(g.renderer.OriginX), int32(g.renderer.OriginY))
 
-	g.ui.AddLogEntry("Welcome to Lala's Quest.")
+	g.ui.AddLogEntry("Welcome to Lili's Quest.")
 	g.ui.AddLogEntry("You are a young cat out hunting for mice.")
 }

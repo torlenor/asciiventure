@@ -1,4 +1,4 @@
-# Lala's Quest Week 4
+# Lili's Quest Week 4
 
 A roguelike exploration game featuring a little cat, monsters and mutations.
 
