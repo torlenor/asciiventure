@@ -20,3 +20,12 @@ type Glyph struct {
 	OffsetX int
 	OffsetY int
 }
+
+// RenderGlyph represents one rendereable glyph.
+type RenderGlyph struct {
+	T   *sdl.Texture
+	Src *sdl.Rect
+
+	ForegroundColor utils.ColorRGBA
+	BackgroundColor utils.ColorRGBA
+}
