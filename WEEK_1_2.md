@@ -1,4 +1,4 @@
-# Lala's Quest Week 1 & 2
+# Lili's Quest Week 1 & 2
 
 A roguelike exploration game featuring a little cat, monsters and mutations.
 

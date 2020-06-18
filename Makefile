@@ -9,7 +9,7 @@ build-container-tagged build-container-gitcommit release-container release-conta
 run runf
 
 NAME := asciiventure
-BINARIES := ${NAME}
+BINARIES := ${NAME} matrixconsoletest
 VERSION := $(shell cat VERSION)
 COMPTIME := $(shell date -Is)
 LDFLAGS := -X main.version=${VERSION} -X main.compTime=${COMPTIME}

@@ -6,7 +6,7 @@ import "github.com/torlenor/asciiventure/utils"
 type Tile struct {
 	Char string
 
-	ForegroundColor utils.ColorRGB
+	ForegroundColor utils.ColorRGBA
 	BackgroundColor utils.ColorRGBA
 
 	Opaque   bool

@@ -17,7 +17,11 @@ func (g *Game) GameLoop() {
 		gameLogicUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
 
 		start = time.Now()
-		g.draw()
+		if g.gameState == mainMenu {
+			g.drawMainMenu()
+		} else {
+			g.draw()
+		}
 		drawUpdateMs := float32(time.Now().Sub(start).Microseconds()) / 1000.0
 		start = time.Now()
 		<-ticker.C

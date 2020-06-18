@@ -60,14 +60,7 @@ func (g *Game) selectGameMap(r int) {
 	g.createItems()
 	g.createMutagens()
 	g.updateFoVs()
-	g.gameState = playersTurn
 	g.ui.AddLogEntry("Map changed.")
 
-	g.focusPlayer()
 	g.updateUI()
-}
-
-func (g *Game) focusPlayer() {
-	g.renderer.OriginX = -g.player.Position.X + int(float32(g.screenWidth)/latticeDX/2/g.renderScale)
-	g.renderer.OriginY = -g.player.Position.Y + int((float32(g.screenHeight+g.screenHeight/6))/latticeDY/2/g.renderScale)
 }
