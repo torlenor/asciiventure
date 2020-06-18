@@ -3,11 +3,12 @@ package game
 type gameState int
 
 const (
-	playersTurn gameState = iota
+	mainMenu gameState = iota
+	playersTurn
 	enemyTurn
 	gameOver
 )
 
 func (d gameState) String() string {
-	return [...]string{"playersTurn", "enemyTurn", "gameOver"}[d]
+	return [...]string{"mainMenu", "playersTurn", "enemyTurn", "gameOver"}[d]
 }

@@ -65,12 +65,16 @@ type Game struct {
 	ui             *ui.UI
 	commandManager *commandManager
 
-	consoleMap *console.MatrixConsole
+	consoleMap      *console.MatrixConsole
+	consoleMainMenu *console.MatrixConsole
+
+	mainMenu *MainMenu
+
+	gameInProgress bool
 }
 
 // Setup should be called first after creating an instance of Game.
 func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
-	log.Printf("Setting up game...")
 	g.debug = true
 
 	g.renderScale = 1.0
@@ -96,12 +100,12 @@ func (g *Game) Setup(windowWidth, windowHeight int, fullscreen bool) {
 	g.ui = ui.NewUI(g.renderer, g.defaultFont, fontSize)
 	g.ui.SetScreenDimensions(g.screenWidth, g.screenHeight)
 
-	g.gameState = playersTurn
+	g.gameState = mainMenu
+
+	g.mainMenu = &MainMenu{}
 
 	g.setupInput()
 	g.setupGame()
-	log.Printf("Done setting up game")
-	g.ui.SetStatusBarText("Done setting up game")
 }
 
 // Shutdown should be called when the program quits.
@@ -152,6 +156,18 @@ func (g *Game) setTargetPosition(x, y int) {
 	g.player.TargetPosition = components.Position{X: x, Y: y}
 }
 
+func (g *Game) drawMainMenu() {
+	g.renderer.GetRenderer().SetClipRect(nil)
+	g.renderer.SetScale(1, 1)
+	g.renderer.Clear()
+
+	g.consoleMainMenu.Clear()
+	g.mainMenu.Render(g.consoleMainMenu, g.gameInProgress)
+	g.consoleMainMenu.Render()
+
+	g.renderer.Present()
+}
+
 func (g *Game) draw() {
 	g.renderer.GetRenderer().SetClipRect(nil)
 	g.renderer.SetScale(g.renderScale, g.renderScale)
@@ -159,7 +175,7 @@ func (g *Game) draw() {
 
 	g.consoleMap.Clear()
 	g.currentGameMap.Render(g.consoleMap, g.player.FoV, g.player, g.entities, int32(g.renderer.OriginX), int32(g.renderer.OriginY))
-	if g.gameState != gameOver {
+	if g.gameState != gameOver && g.gameState != mainMenu {
 		g.renderMouseTile()
 	}
 	g.consoleMap.Render()

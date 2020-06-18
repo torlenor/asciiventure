@@ -11,11 +11,12 @@ func (g *Game) updateUI() {
 }
 
 func (g *Game) updateStatusBar() {
+	targetX, targetY := g.currentGameMap.GetPositionFromRenderCoordinates(g.mouseTileX, g.mouseTileY)
 	for _, e := range g.entities {
 		if e == nil || e.Position == nil {
 			continue
 		}
-		if e.Position.Equal(components.Position{X: int(g.mouseTileX), Y: int(g.mouseTileY)}) && e != g.player {
+		if e.Position.Equal(components.Position{X: int(targetX), Y: int(targetY)}) && e != g.player {
 			if e.Dead {
 				g.ui.SetStatusBarText(e.Name + "(Dead)")
 			} else {
@@ -30,7 +31,7 @@ func (g *Game) updateStatusBar() {
 			return
 		}
 	}
-	if g.currentGameMap.IsPortal(components.Position{X: int(g.mouseTileX), Y: int(g.mouseTileY)}) {
+	if g.currentGameMap.IsPortal(components.Position{X: int(targetX), Y: int(targetY)}) {
 		g.ui.SetStatusBarText("Stairs to next map. Press 'g' to use them.")
 	} else {
 		g.ui.SetStatusBarText("")

@@ -52,8 +52,6 @@ func (g *Game) setupRenderer() {
 		log.Fatalf("Failed to create renderer: %s", err)
 	}
 	g.renderer = renderers.NewRenderer(renderer)
-	// g.renderer.GlyphWidth = latticeDX
-	// g.renderer.GlyphHeight = latticeDY
 }
 
 func (g *Game) setupConsoles() {
@@ -65,6 +63,14 @@ func (g *Game) setupConsoles() {
 	availableHeight := int32(g.screenHeight - g.screenHeight/6 - 2*16)
 	g.consoleMap = console.NewMatrixConsole(g.renderer, tileset, availableWidth, availableHeight, availableWidth/tileset.GetCharWidth(), availableHeight/tileset.GetCharHeight())
 	g.consoleMap.SetOffset(0, int32(g.screenHeight/6))
+
+	availableWidth = int32(g.screenWidth)
+	availableHeight = int32(g.screenHeight)
+	tilesetMainMenu, err := console.NewFontTileset(g.renderer, "./assets/textures/consolas6x12_gs_tc.png")
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	g.consoleMainMenu = console.NewMatrixConsole(g.renderer, tilesetMainMenu, availableWidth, availableHeight, 54, 42)
 }
 
 func (g *Game) setupGame() {

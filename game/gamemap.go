@@ -60,7 +60,6 @@ func (g *Game) selectGameMap(r int) {
 	g.createItems()
 	g.createMutagens()
 	g.updateFoVs()
-	g.gameState = playersTurn
 	g.ui.AddLogEntry("Map changed.")
 
 	g.updateUI()

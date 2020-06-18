@@ -11,6 +11,7 @@ func (g *Game) setupInput() {
 	g.commandManager.RegisterMouseObserver(g)
 
 	g.commandManager.RegisterCommand(CommandQuit, "quit", sdl.K_ESCAPE, false, false, false, true)
+	g.commandManager.RegisterCommand(CommandQuit, "quit", int('q'), false, false, false, true)
 
 	g.commandManager.RegisterCommand(CommandMoveN, "move_n", sdl.K_UP, false, false, false, true)
 	g.commandManager.RegisterCommand(CommandMoveE, "move_e", sdl.K_RIGHT, false, false, false, true)
@@ -38,6 +39,7 @@ func (g *Game) setupInput() {
 	g.commandManager.RegisterCommand(CommandScrollRight, "scroll_right", sdl.K_RIGHT, false, false, true, true)
 
 	g.commandManager.RegisterCommand(CommandInteract, "interact", int('g'), false, false, false, true)
+	g.commandManager.RegisterCommand(CommandInteract, "interact", sdl.K_RETURN, false, false, false, true)
 
 	g.commandManager.RegisterCommand(CommandSelect1, "select_1", int('1'), false, false, false, true)
 	g.commandManager.RegisterCommand(CommandSelect2, "select_2", int('2'), false, false, false, true)
@@ -65,119 +67,141 @@ func (g *Game) setupInput() {
 
 // NotifyCommand will be called from commandManager when a registered command is received.
 func (g *Game) NotifyCommand(command command) {
-	switch command {
-	case CommandQuit:
-		g.quit = true
-	case CommandMoveN:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.Y = g.player.Position.Y - 1
-		g.nextStep = true
-	case CommandMoveNE:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X + 1
-		g.player.TargetPosition.Y = g.player.Position.Y - 1
-		g.nextStep = true
-	case CommandMoveE:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X + 1
-		g.nextStep = true
-	case CommandMoveSE:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X + 1
-		g.player.TargetPosition.Y = g.player.Position.Y + 1
-		g.nextStep = true
-	case CommandMoveS:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.Y = g.player.Position.Y + 1
-		g.nextStep = true
-	case CommandMoveSW:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X - 1
-		g.player.TargetPosition.Y = g.player.Position.Y + 1
-		g.nextStep = true
-	case CommandMoveW:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X - 1
-		g.nextStep = true
-	case CommandMoveNW:
-		g.movementPath = []components.Position{}
-		g.player.TargetPosition = *g.player.Position
-		g.player.TargetPosition.X = g.player.Position.X - 1
-		g.player.TargetPosition.Y = g.player.Position.Y - 1
-		g.nextStep = true
-	case CommandScrollUp:
-		g.renderer.OriginY += 2
-	case CommandScrollLeft:
-		g.renderer.OriginX += 2
-	case CommandScrollDown:
-		g.renderer.OriginY -= 2
-	case CommandScrollRight:
-		g.renderer.OriginX -= 2
-	case CommandZoomIn:
-		g.renderScale += 0.1
-		g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
-	case CommandZoomOut:
-		g.renderScale -= 0.1
-		g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
-	case CommandNextTimeStep:
-		g.nextStep = true
-	case CommandInteract:
-		g.performPlayerAction(components.ActionTypeInteract, 0)
-		g.nextStep = true
-	case CommandSelect1:
-		g.performPlayerAction(components.ActionTypeUseItem, 0)
-		g.nextStep = true
-	case CommandSelect2:
-		g.performPlayerAction(components.ActionTypeUseItem, 1)
-		g.nextStep = true
-	case CommandSelect3:
-		g.performPlayerAction(components.ActionTypeUseItem, 2)
-		g.nextStep = true
-	case CommandSelect4:
-		g.performPlayerAction(components.ActionTypeUseItem, 3)
-		g.nextStep = true
-	case CommandSelect5:
-		g.performPlayerAction(components.ActionTypeUseItem, 4)
-		g.nextStep = true
-	case CommandSelect6:
-		g.performPlayerAction(components.ActionTypeUseItem, 5)
-		g.nextStep = true
-	case CommandSelect7:
-		g.performPlayerAction(components.ActionTypeUseItem, 6)
-		g.nextStep = true
-	case CommandSelect8:
-		g.performPlayerAction(components.ActionTypeUseItem, 7)
-		g.nextStep = true
-	case CommandSelect9:
-		g.performPlayerAction(components.ActionTypeUseItem, 8)
-		g.nextStep = true
-	case CommandAltSelect1:
-		g.selectGameMap(1)
-	case CommandAltSelect2:
-		g.selectGameMap(2)
-	case CommandAltSelect3:
-		g.selectGameMap(3)
-	case CommandAltSelect4:
-		g.selectGameMap(4)
-	case CommandAltSelect5:
-		g.selectGameMap(5)
-	case CommandAltSelect6:
-		g.selectGameMap(6)
-	case CommandAltSelect7:
-		g.selectGameMap(7)
-	case CommandAltSelect8:
-		g.selectGameMap(8)
-	case CommandAltSelect9:
-		g.selectGameMap(9)
-	case CommandDebugReload:
-		g.loadGameMapsFromDirectory("./assets/rooms")
+	if command == CommandQuit {
+		g.gameState = mainMenu
+	}
+	if g.gameState == playersTurn {
+		switch command {
+		case CommandMoveN:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.nextStep = true
+		case CommandMoveNE:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X + 1
+			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.nextStep = true
+		case CommandMoveE:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X + 1
+			g.nextStep = true
+		case CommandMoveSE:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X + 1
+			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.nextStep = true
+		case CommandMoveS:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.nextStep = true
+		case CommandMoveSW:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X - 1
+			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.nextStep = true
+		case CommandMoveW:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X - 1
+			g.nextStep = true
+		case CommandMoveNW:
+			g.movementPath = []components.Position{}
+			g.player.TargetPosition = *g.player.Position
+			g.player.TargetPosition.X = g.player.Position.X - 1
+			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.nextStep = true
+		case CommandScrollUp:
+			g.renderer.OriginY += 2
+		case CommandScrollLeft:
+			g.renderer.OriginX += 2
+		case CommandScrollDown:
+			g.renderer.OriginY -= 2
+		case CommandScrollRight:
+			g.renderer.OriginX -= 2
+		case CommandZoomIn:
+			g.renderScale += 0.1
+			g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
+		case CommandZoomOut:
+			g.renderScale -= 0.1
+			g.consoleMap.SetOffset(0, int32(float32(g.screenHeight/6)/g.renderScale))
+		case CommandNextTimeStep:
+			g.nextStep = true
+		case CommandInteract:
+			g.performPlayerAction(components.ActionTypeInteract, 0)
+			g.nextStep = true
+		case CommandSelect1:
+			g.performPlayerAction(components.ActionTypeUseItem, 0)
+			g.nextStep = true
+		case CommandSelect2:
+			g.performPlayerAction(components.ActionTypeUseItem, 1)
+			g.nextStep = true
+		case CommandSelect3:
+			g.performPlayerAction(components.ActionTypeUseItem, 2)
+			g.nextStep = true
+		case CommandSelect4:
+			g.performPlayerAction(components.ActionTypeUseItem, 3)
+			g.nextStep = true
+		case CommandSelect5:
+			g.performPlayerAction(components.ActionTypeUseItem, 4)
+			g.nextStep = true
+		case CommandSelect6:
+			g.performPlayerAction(components.ActionTypeUseItem, 5)
+			g.nextStep = true
+		case CommandSelect7:
+			g.performPlayerAction(components.ActionTypeUseItem, 6)
+			g.nextStep = true
+		case CommandSelect8:
+			g.performPlayerAction(components.ActionTypeUseItem, 7)
+			g.nextStep = true
+		case CommandSelect9:
+			g.performPlayerAction(components.ActionTypeUseItem, 8)
+			g.nextStep = true
+		case CommandAltSelect1:
+			g.selectGameMap(1)
+		case CommandAltSelect2:
+			g.selectGameMap(2)
+		case CommandAltSelect3:
+			g.selectGameMap(3)
+		case CommandAltSelect4:
+			g.selectGameMap(4)
+		case CommandAltSelect5:
+			g.selectGameMap(5)
+		case CommandAltSelect6:
+			g.selectGameMap(6)
+		case CommandAltSelect7:
+			g.selectGameMap(7)
+		case CommandAltSelect8:
+			g.selectGameMap(8)
+		case CommandAltSelect9:
+			g.selectGameMap(9)
+		case CommandDebugReload:
+			g.loadGameMapsFromDirectory("./assets/rooms")
+		}
+	} else if g.gameState == mainMenu {
+		switch command {
+		case CommandInteract:
+			switch g.mainMenu.Select() {
+			case MainMenuActionStartGame:
+				g.gameInProgress = true
+				g.gameState = playersTurn
+			case MainMenuActionQuit:
+				g.quit = true
+			}
+		case CommandMoveN:
+			g.mainMenu.MoveCursor(0, -1)
+		case CommandMoveE:
+			g.mainMenu.MoveCursor(1, 0)
+		case CommandMoveS:
+			g.mainMenu.MoveCursor(0, 1)
+		case CommandMoveW:
+			g.mainMenu.MoveCursor(-1, 0)
+		}
 	}
 }
 
