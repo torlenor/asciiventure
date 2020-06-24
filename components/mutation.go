@@ -1,6 +1,7 @@
 package components
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -32,6 +33,30 @@ func MutationEffectFromString(mutationString string) (MutationEffect, error) {
 	default:
 		return MutationEffectUnknown, fmt.Errorf("Unknown mutation '%s'", mutationString)
 	}
+}
+
+// UnmarshalJSON unmarshals a JSON into a MutationEffect.
+func (d *MutationEffect) UnmarshalJSON(data []byte) error {
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	var ok bool
+	effectStr, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("Effect not defined or not string")
+	}
+
+	var err error
+	effect, err := MutationEffectFromString(effectStr)
+	if err != nil {
+		return err
+	}
+
+	*d = effect
+
+	return nil
 }
 
 // MutationCategory type
@@ -66,11 +91,35 @@ func MutationCategoryFromString(mutationCategoryString string) (MutationCategory
 	}
 }
 
+// UnmarshalJSON unmarshals a JSON into a MutationCategory.
+func (d *MutationCategory) UnmarshalJSON(data []byte) error {
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	var ok bool
+	categoryStr, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("Category not defined or not string")
+	}
+
+	var err error
+	category, err := MutationCategoryFromString(categoryStr)
+	if err != nil {
+		return err
+	}
+
+	*d = category
+
+	return nil
+}
+
 // Mutation describes properties of one mutation entity.
 type Mutation struct {
-	Effect   MutationEffect
-	Category MutationCategory
-	Data     int
+	Effect   MutationEffect   `json:"Effect"`
+	Category MutationCategory `json:"Category"`
+	Data     int32            `json:"Data"`
 }
 
 func (m Mutation) String() string {
@@ -100,7 +149,7 @@ func (m Mutations) Has(mutation MutationEffect) bool {
 
 // GetData returns the data for the specified MutationEffect, or always 0 if it does not exist.
 // Do not forget to check first with Has(mutation)!
-func (m Mutations) GetData(mutation MutationEffect) int {
+func (m Mutations) GetData(mutation MutationEffect) int32 {
 	for _, m := range m {
 		if m.Effect == mutation {
 			return m.Data

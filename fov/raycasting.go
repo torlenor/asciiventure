@@ -15,7 +15,7 @@ type OpaqueGraph interface {
 
 // UpdateFoV updates the map with current field of view data based on the provided entity postion.
 // viewRange is the number of tiles the entity can see.
-func UpdateFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, entityPosition components.Position, ignoreOpaque bool) {
+func UpdateFoV(r OpaqueGraph, fovMap FoVMap, viewRange int32, entityPosition components.Position, ignoreOpaque bool) {
 	fovMap.ClearVisible()
 	for i := 0; i < 360; i++ {
 		uvecX := math.Cos(float64(i) * 0.01745)
@@ -26,10 +26,10 @@ func UpdateFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, entityPosition compo
 
 // doFoV performs the actual Field of View calculation for the given view range and player coordinates
 // in the direction of the provided unit vector (x,y).
-func doFoV(r OpaqueGraph, fovMap FoVMap, viewRange int, x float64, y float64, entityPosition components.Position, ignoreOpaque bool) {
+func doFoV(r OpaqueGraph, fovMap FoVMap, viewRange int32, x float64, y float64, entityPosition components.Position, ignoreOpaque bool) {
 	ox := float64(entityPosition.X)
 	oy := float64(entityPosition.Y)
-	for i := 0; i < viewRange; i++ {
+	for i := int32(0); i < viewRange; i++ {
 		ix := int(ox + 0.5)
 		iy := int(oy + 0.5)
 		fovMap.UpdateSeen(components.Position{X: ix, Y: iy}, true)

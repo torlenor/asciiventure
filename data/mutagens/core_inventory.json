@@ -5,11 +5,11 @@
         "Color": {
             "R": 100,
             "G": 255,
-            "B": 100
+            "B": 100,
+            "A": 255
         }
     },
     "Mutagen": {
-        "IsMutagen": true,
         "Effect": "Inventory",
         "Category": "Core"
     }

@@ -2,86 +2,60 @@ package entity
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/torlenor/asciiventure/components"
-	"github.com/torlenor/asciiventure/utils"
 )
 
 type entityData struct {
-	Name  string `json:"Name"`
-	Glyph struct {
-		Char  string `json:"Char"`
-		Color struct {
-			R uint8 `json:"R"`
-			G uint8 `json:"G"`
-			B uint8 `json:"B"`
-		} `json:"Color"`
-	} `json:"Glyph"`
-	Combat struct {
-		HP      int `json:"HP"`
-		Defense int `json:"Defense"`
-		Power   int `json:"Power"`
-	} `json:"Combat"`
-	AI struct {
-		AttackRange      int `json:"AttackRange"`
-		AttackRangeUntil int `json:"AttackRangeUntil"`
-	} `json:"AI"`
-	Vision struct {
-		Range int `json:"Range"`
-	} `json:"Vision"`
-	Item struct {
-		CanPickup  bool   `json:"CanPickup"`
-		Consumable bool   `json:"Consumable"`
-		Effect     string `json:"Effect"`
-		Data       int    `json:"Data"`
-	} `json:"Item"`
-	Mutagen struct {
-		IsMutagen bool   `json:"IsMutagen"`
-		Effect    string `json:"Effect"`
-		Category  string `json:"Category"`
-		Data      int    `json:"Data"`
-	} `json:"Mutagen"`
+	Name    string                 `json:"Name"`
+	Glyph   *components.Renderable `json:"Glyph"`
+	Health  *components.Health     `json:"Health"`
+	Combat  *components.Combat     `json:"Combat"`
+	AI      *components.AI         `json:"AI"`
+	Vision  *components.Vision     `json:"Vision"`
+	Item    *components.Item       `json:"Item"`
+	Mutagen *components.Mutation   `json:"Mutagen"`
 }
 
-// ParseMonster parses a monster description and returns the corresponding entity.
-func ParseMonster(filename string) *Entity {
+// ParseJSON parses a JSON and returns its entity.
+func ParseJSON(filename string) (*Entity, error) {
 	file, _ := ioutil.ReadFile(filename)
 	data := entityData{}
 
 	err := json.Unmarshal([]byte(file), &data)
 	if err != nil {
-		log.Printf("Error parsing monster file %s: %s", filename, err)
+		return nil, fmt.Errorf("Error parsing entity JSON file %s: %s", filename, err)
 	}
 
-	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
-	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-	e.Combat = &components.Combat{CurrentHP: data.Combat.HP, HP: data.Combat.HP, Power: data.Combat.Power, Defense: data.Combat.Defense}
-	e.AI = &components.AI{AttackRange: data.AI.AttackRange, AttackRangeUntil: data.AI.AttackRangeUntil}
-	e.VisibilityRange = data.Vision.Range
+	e := NewEmptyEntity()
+	e.Name = data.Name
+	e.Renderable = data.Glyph
+	e.Health = data.Health
+	e.Combat = data.Combat
+	e.AI = data.AI
+	e.Vision = data.Vision
+	e.Item = data.Item
+	e.Mutagen = data.Mutagen
 
-	return e
+	return e, nil
 }
 
 // ParseItem parses a item description and returns the corresponding entity.
 func ParseItem(filename string) *Entity {
-	file, _ := ioutil.ReadFile(filename)
-	data := entityData{}
-
-	err := json.Unmarshal([]byte(file), &data)
-	if err != nil {
-		log.Printf("Error parsing item file %s: %s", filename, err)
+	e, err := ParseJSON(filename)
+	if err != nil || e == nil {
+		log.Printf("%s", err)
+		return nil
 	}
 
-	var eff components.ItemEffect
-	if eff, err = components.ItemEffectFromString(data.Item.Effect); err == nil {
-		color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
-		e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-		e.Item = &components.Item{CanPickup: data.Item.CanPickup, Consumable: data.Item.Consumable, Effect: eff, Data: data.Item.Data}
-		return e
+	if e.Item == nil {
+		log.Printf("Not a item entity file")
+		return nil
 	}
+	e.Blocks = true
 
-	log.Printf("%s", err)
-	return nil
+	return e
 }

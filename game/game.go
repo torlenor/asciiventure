@@ -128,17 +128,12 @@ func (g *Game) createGlyphTexture() {
 }
 
 func (g *Game) createPlayer() {
-	e := entity.NewEntity("Player", "@", utils.ColorRGB{R: 0, G: 128, B: 255}, components.Position{}, true)
-	e.Combat = &components.Combat{CurrentHP: 40, HP: 40, Power: 5, Defense: 2}
-	e.VisibilityRange = 20
+	e := entity.NewEntity("Player", &components.Renderable{Char: "@", Color: utils.ColorRGBA{R: 0, G: 128, B: 255, A: 255}}, components.Position{}, true)
+	e.Combat = &components.Combat{Power: 5, Defense: 2}
+	e.Health = &components.Health{CurrentHP: 40, HP: 40}
+	e.Vision = &components.Vision{Range: 20}
 	g.entities = append(g.entities, e)
 	g.player = e
-}
-
-func (g *Game) createEnemy(name string, char string, color utils.ColorRGB, p components.Position) *entity.Entity {
-	e := entity.NewEntity(name, char, color, p, true)
-	e.TargetPosition = p
-	return e
 }
 
 // Occupied returns true if the given tile is occupied by a blocking entity and if the tile is currently visible.
@@ -202,13 +197,13 @@ func (g *Game) timestep() {
 
 func (g *Game) updateFoVs() {
 	for _, e := range g.entities {
-		if e.Position == nil {
+		if e.Position == nil || e.Vision == nil {
 			continue
 		}
 		if e.Mutations.Has(components.MutationEffectXRay) {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, true)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, true)
 		} else {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.VisibilityRange+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, false)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, false)
 		}
 	}
 }

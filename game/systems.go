@@ -9,7 +9,7 @@ func (g *Game) pickupSystem() {
 	for _, e := range g.entities {
 		if e.Actor != nil && e.Actor.NextAction == components.ActionTypeInteract {
 			for _, target := range g.entities {
-				if target != nil && (target.Item != nil || target.Mutation != nil) && target.Position != nil && target.Position.Equal(*e.Position) {
+				if target != nil && (target.Item != nil || target.Mutagen != nil) && target.Position != nil && target.Position.Equal(*e.Position) {
 					if target.Item != nil {
 						result := e.PickUpItem(target)
 						for _, r := range result {
@@ -20,7 +20,7 @@ func (g *Game) pickupSystem() {
 							}
 						}
 					}
-					if target.Mutation != nil {
+					if target.Mutagen != nil {
 						result := e.ConsumeMutation(target)
 						for _, r := range result {
 							switch r.Type {

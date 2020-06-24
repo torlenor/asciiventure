@@ -1,42 +1,22 @@
 package entity
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-
-	"github.com/torlenor/asciiventure/components"
-	"github.com/torlenor/asciiventure/utils"
 )
 
 // ParseMutagen parses a mutagen description and returns the corresponding entity.
 func ParseMutagen(filename string) *Entity {
-	file, _ := ioutil.ReadFile(filename)
-	data := entityData{}
-
-	err := json.Unmarshal([]byte(file), &data)
-	if err != nil {
-		log.Printf("Error parsing mutagen file %s: %s", filename, err)
-	}
-
-	color := utils.ColorRGB{R: data.Glyph.Color.R, G: data.Glyph.Color.G, B: data.Glyph.Color.B}
-	e := NewEntity(data.Name, data.Glyph.Char, color, components.Position{}, true)
-	if data.Mutagen.IsMutagen {
-		if t, err := components.MutationEffectFromString(data.Mutagen.Effect); err == nil {
-			if c, err := components.MutationCategoryFromString(data.Mutagen.Category); err == nil {
-				e.Mutation = &components.Mutation{Effect: t, Category: c, Data: data.Mutagen.Data}
-			} else {
-				log.Printf("%s", err)
-				return nil
-			}
-		} else {
-			log.Printf("%s", err)
-			return nil
-		}
-	} else {
-		log.Printf("Not a mutagen")
+	e, err := ParseJSON(filename)
+	if err != nil || e == nil {
+		log.Printf("%s", err)
 		return nil
 	}
+
+	if e.Mutagen == nil {
+		log.Printf("Not a mutagen entity file")
+		return nil
+	}
+	e.Blocks = true
 
 	return e
 }

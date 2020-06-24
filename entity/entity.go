@@ -6,48 +6,51 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/fov"
-	"github.com/torlenor/asciiventure/utils"
 )
 
-// Entity defines an entity in our entity-component system
+// Entity defines an entity in our entity-component-system system
 type Entity struct {
 	Name string
-
-	Char  string
-	Color utils.ColorRGB
 
 	InitialPosition components.Position
 	TargetPosition  components.Position
 
-	Actor    *components.Actor
-	AI       *components.AI
-	Combat   *components.Combat
-	Item     *components.Item
-	Mutation *components.Mutation
-	Position *components.Position
+	Actor      *components.Actor
+	AI         *components.AI
+	Combat     *components.Combat
+	Health     *components.Health
+	Item       *components.Item
+	Mutagen    *components.Mutation
+	Position   *components.Position
+	Renderable *components.Renderable
+	Vision     *components.Vision
 
 	Blocks bool
 	Dead   bool
 
 	FoV fov.FoVMap
 
-	VisibilityRange int
-
-	Mutations components.Mutations
 	Inventory *Inventory
+	Mutations components.Mutations
 }
 
 // NewEntity creates a new unique entity.
-func NewEntity(name string, char string, color utils.ColorRGB, initPosition components.Position, blocks bool) *Entity {
+func NewEntity(name string, renderable *components.Renderable, initPosition components.Position, blocks bool) *Entity {
 	return &Entity{
 		Name:            name,
-		Char:            char,
-		Color:           color,
+		Renderable:      renderable,
 		Position:        &initPosition,
 		Blocks:          blocks,
 		FoV:             make(fov.FoVMap),
 		InitialPosition: initPosition,
 		Inventory:       &Inventory{MaxSlots: 4},
+	}
+}
+
+// NewEmptyEntity creates an empty entity.
+func NewEmptyEntity() *Entity {
+	return &Entity{
+		FoV: make(fov.FoVMap),
 	}
 }
 
@@ -91,11 +94,15 @@ func (e *Entity) UseItem(target *Entity) (result []ActionResult) {
 			var effectString string
 			switch target.Item.Effect {
 			case components.ItemEffectHealing:
-				e.Combat.CurrentHP += target.Item.Data
-				if e.Combat.CurrentHP > e.Combat.HP {
-					e.Combat.CurrentHP = e.Combat.HP
+				if e.Health != nil {
+					e.Health.CurrentHP += target.Item.Data
+					if e.Health.CurrentHP > e.Health.HP {
+						e.Health.CurrentHP = e.Health.HP
+					}
+					effectString = fmt.Sprintf("%d healed.", target.Item.Data)
+				} else {
+					return
 				}
-				effectString = fmt.Sprintf("%d healed.", target.Item.Data)
 			default:
 				log.Printf("Effect not implemented")
 			}
@@ -110,11 +117,11 @@ func (e *Entity) UseItem(target *Entity) (result []ActionResult) {
 
 // ConsumeMutation takes the mutation defined in target and adds it to e.
 func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
-	if target.Mutation != nil {
-		if !e.Mutations.Has(target.Mutation.Effect) {
-			e.Mutations = append(e.Mutations, *target.Mutation)
+	if target.Mutagen != nil {
+		if !e.Mutations.Has(target.Mutagen.Effect) {
+			e.Mutations = append(e.Mutations, *target.Mutagen)
 			target.Position = nil
-			result = append(result, ActionResult{Type: ActionResultMutationConsumed, MutationEffectValue: target.Mutation.Effect})
+			result = append(result, ActionResult{Type: ActionResultMutationConsumed, MutationEffectValue: target.Mutagen.Effect})
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s gained mutation %s.", e.Name, target.Name)})
 		} else {
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("%s already has %s.", e.Name, target.Name)})

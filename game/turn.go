@@ -28,9 +28,9 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 	results := e.Attack(target)
 	for _, result := range results {
 		if result.Type == entity.CombatResultTakeDamage {
-			target.Combat.CurrentHP -= result.IntegerValue
-			g.ui.AddLogEntry(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Combat.CurrentHP, target.Combat.HP))
-			if target.Combat.CurrentHP <= 0 {
+			target.Health.CurrentHP -= result.IntegerValue
+			g.ui.AddLogEntry(fmt.Sprintf("%s scratches %s for %d hit points. %d/%d HP left.", e.Name, target.Name, result.IntegerValue, target.Health.CurrentHP, target.Health.HP))
+			if target.Health.CurrentHP <= 0 {
 				g.killEntity(target)
 				if target == g.player {
 					g.gameState = gameOver

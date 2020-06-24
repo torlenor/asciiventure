@@ -5,13 +5,17 @@
         "Color": {
             "R": 255,
             "G": 0,
-            "B": 0
+            "B": 0,
+            "A": 255
         }
     },
     "Combat": {
-        "HP": 10,
         "Defense": 2,
         "Power": 5
+    },
+    "Health": {
+        "HP": 10,
+        "CurrentHP": 10
     },
     "AI": {
         "AttackRange": 10,

@@ -35,21 +35,21 @@ func (r *GameMap) Render(console *console.MatrixConsole, foV fov.FoVMap, player 
 
 	// TODO: Optimize rendering of entities on map so that we do not need three passes
 	for _, e := range entities {
-		if e.Position != nil && foV.Visible(*e.Position) && e.Dead {
+		if e.Position != nil && e.Renderable != nil && foV.Visible(*e.Position) && e.Dead {
 			console.PutCharColor(int32(e.Position.X)+r.currentOffsetX, int32(e.Position.Y)+r.currentOffsetY, "%", utils.ColorRGBA{R: 150, G: 150, B: 150, A: 255}, utils.ColorRGBA{})
 		}
 	}
 	for _, e := range entities {
-		if e.Position != nil && foV.Visible(*e.Position) && (e.Item != nil || e.Mutation != nil) {
-			console.PutCharColor(int32(e.Position.X)+r.currentOffsetX, int32(e.Position.Y)+r.currentOffsetY, e.Char, utils.ColorRGBA{R: e.Color.R, G: e.Color.G, B: e.Color.B, A: 255}, utils.ColorRGBA{})
+		if e.Position != nil && e.Renderable != nil && foV.Visible(*e.Position) && (e.Item != nil || e.Mutagen != nil) {
+			console.PutCharColor(int32(e.Position.X)+r.currentOffsetX, int32(e.Position.Y)+r.currentOffsetY, e.Renderable.Char, e.Renderable.Color, utils.ColorRGBA{})
 		}
 	}
 	for _, e := range entities {
-		if e.Position == nil || e.Item != nil || e.Mutation != nil || e.Dead {
+		if e.Position == nil || e.Renderable == nil || e.Item != nil || e.Mutagen != nil || e.Dead {
 			continue
 		}
 		if foV.Visible(*e.Position) {
-			console.PutCharColor(int32(e.Position.X)+r.currentOffsetX, int32(e.Position.Y)+r.currentOffsetY, e.Char, utils.ColorRGBA{R: e.Color.R, G: e.Color.G, B: e.Color.B, A: 255}, utils.ColorRGBA{})
+			console.PutCharColor(int32(e.Position.X)+r.currentOffsetX, int32(e.Position.Y)+r.currentOffsetY, e.Renderable.Char, e.Renderable.Color, utils.ColorRGBA{})
 		}
 	}
 }

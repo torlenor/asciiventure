@@ -17,6 +17,6 @@ func (d CombatResultType) String() string {
 // CombatResult is one result of a combat action.
 type CombatResult struct {
 	Type         CombatResultType
-	IntegerValue int
+	IntegerValue int32
 	StringValue  string
 }

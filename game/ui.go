@@ -22,8 +22,8 @@ func (g *Game) updateStatusBar() {
 			} else {
 				if e.Item != nil {
 					g.ui.SetStatusBarText(e.Name + ": Pick up item with 'g'")
-				} else if e.Mutation != nil {
-					g.ui.SetStatusBarText(e.Mutation.String() + ": " + e.Mutation.GetDescription())
+				} else if e.Mutagen != nil {
+					g.ui.SetStatusBarText(e.Mutagen.String() + ": " + e.Mutagen.GetDescription())
 				} else {
 					g.ui.SetStatusBarText(e.Name)
 				}
@@ -48,5 +48,5 @@ func (g *Game) updateInventoryPane() {
 }
 
 func (g *Game) updateCharacterWindow() {
-	g.ui.UpdateCharacterPane(g.time, g.player.Combat.CurrentHP, g.player.Combat.HP, g.player.VisibilityRange, g.player.Combat.Power, g.player.Combat.Defense)
+	g.ui.UpdateCharacterPane(g.time, g.player.Health.CurrentHP, g.player.Health.HP, g.player.Vision.Range+g.player.Mutations.GetData(components.MutationEffectIncreasedVision), g.player.Combat.Power, g.player.Combat.Defense)
 }
