@@ -20,7 +20,7 @@ func (g *Game) performPlayerAction(at components.ActionType, intValue int) {
 
 	switch at {
 	case components.ActionTypeInteract:
-		if g.currentGameMap.IsPortal(*g.player.Position) {
+		if g.currentGameMap.IsPortal(g.player.Position.Current) {
 			g.selectGameMap(g.currentGamMapID + 1)
 		}
 	case components.ActionTypeDropItem:

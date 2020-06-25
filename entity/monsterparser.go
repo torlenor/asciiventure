@@ -2,6 +2,8 @@ package entity
 
 import (
 	"log"
+
+	"github.com/torlenor/asciiventure/components"
 )
 
 // ParseMonster parses a monster description and returns the corresponding entity.
@@ -12,11 +14,11 @@ func ParseMonster(filename string) *Entity {
 		return nil
 	}
 
-	if e.Combat == nil || e.Health == nil || e.AI == nil || e.Vision == nil {
+	if e.Appearance == nil || e.Combat == nil || e.Health == nil || e.AI == nil || e.Vision == nil {
 		log.Printf("Not a monster entity file")
 		return nil
 	}
-	e.Blocks = true
+	e.IsBlocking = &components.IsBlocking{}
 
 	return e
 }

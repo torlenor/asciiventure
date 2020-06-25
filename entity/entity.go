@@ -6,27 +6,25 @@ import (
 
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/fov"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 // Entity defines an entity in our entity-component-system system
 type Entity struct {
-	Name string
-
-	InitialPosition components.Position
-	TargetPosition  components.Position
+	TargetPosition utils.Vec2
 
 	Actor      *components.Actor
 	AI         *components.AI
+	Appearance *components.Appearance
 	Combat     *components.Combat
 	Health     *components.Health
+	IsBlocking *components.IsBlocking
+	IsDead     *components.IsDead
 	Item       *components.Item
 	Mutagen    *components.Mutation
+	Name       string // Every entity has a name, even when it's empty
 	Position   *components.Position
-	Renderable *components.Renderable
 	Vision     *components.Vision
-
-	Blocks bool
-	Dead   bool
 
 	FoV fov.FoVMap
 
@@ -35,16 +33,18 @@ type Entity struct {
 }
 
 // NewEntity creates a new unique entity.
-func NewEntity(name string, renderable *components.Renderable, initPosition components.Position, blocks bool) *Entity {
-	return &Entity{
-		Name:            name,
-		Renderable:      renderable,
-		Position:        &initPosition,
-		Blocks:          blocks,
-		FoV:             make(fov.FoVMap),
-		InitialPosition: initPosition,
-		Inventory:       &Inventory{MaxSlots: 4},
+func NewEntity(name string, appearance *components.Appearance, initPosition utils.Vec2, blocks bool) *Entity {
+	e := &Entity{
+		Name:       name,
+		Appearance: appearance,
+		Position:   &components.Position{Current: initPosition, Initial: initPosition},
+		FoV:        make(fov.FoVMap),
+		Inventory:  &Inventory{MaxSlots: 4},
 	}
+	if blocks {
+		e.IsBlocking = &components.IsBlocking{}
+	}
+	return e
 }
 
 // NewEmptyEntity creates an empty entity.
@@ -79,7 +79,7 @@ func (e *Entity) PickUpItem(target *Entity) (result []ActionResult) {
 func (e *Entity) DropItem(target *Entity) (result []ActionResult) {
 	if target.Item != nil {
 		if item := e.Inventory.PopOneByName(target.Name); item != nil {
-			item.Position = &components.Position{X: e.Position.X, Y: e.Position.Y}
+			item.Position = &components.Position{Current: e.Position.Current}
 			result = append(result, ActionResult{Type: ActionResultItemDropped})
 			result = append(result, ActionResult{Type: ActionResultMessage, StringValue: fmt.Sprintf("Item %s dropped.", target.Name)})
 		}
@@ -132,9 +132,12 @@ func (e *Entity) ConsumeMutation(target *Entity) (result []ActionResult) {
 }
 
 // MoveTo moves the entity to (y,y).
-func (e *Entity) MoveTo(p components.Position) {
-	e.Position.X = p.X
-	e.Position.Y = p.Y
+func (e *Entity) MoveTo(p utils.Vec2) {
+	if e.Position != nil {
+		e.Position.Current = p
+	} else {
+		e.Position = &components.Position{Current: p, Initial: p}
+	}
 }
 
 // Attack the target entity.

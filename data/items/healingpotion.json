@@ -1,6 +1,6 @@
 {
     "Name": "Healing Potion",
-    "Glyph": {
+    "Appearance": {
         "Char": "h",
         "Color": {
             "R": 255,

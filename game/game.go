@@ -52,7 +52,7 @@ type Game struct {
 	mouseTileX int32
 	mouseTileY int32
 
-	movementPath []components.Position
+	movementPath []utils.Vec2
 
 	player   *entity.Entity
 	entities []*entity.Entity
@@ -128,7 +128,7 @@ func (g *Game) createGlyphTexture() {
 }
 
 func (g *Game) createPlayer() {
-	e := entity.NewEntity("Player", &components.Renderable{Char: "@", Color: utils.ColorRGBA{R: 0, G: 128, B: 255, A: 255}}, components.Position{}, true)
+	e := entity.NewEntity("Player", &components.Appearance{Char: "@", Color: utils.ColorRGBA{R: 0, G: 128, B: 255, A: 255}}, utils.Vec2{}, true)
 	e.Combat = &components.Combat{Power: 5, Defense: 2}
 	e.Health = &components.Health{CurrentHP: 40, HP: 40}
 	e.Vision = &components.Vision{Range: 20}
@@ -137,18 +137,18 @@ func (g *Game) createPlayer() {
 }
 
 // Occupied returns true if the given tile is occupied by a blocking entity and if the tile is currently visible.
-func (g *Game) Occupied(p components.Position) bool {
+func (g *Game) Occupied(p utils.Vec2) bool {
 	for _, e := range g.entities {
-		if e.Position != nil && e.Position.X == p.X && e.Position.Y == p.Y && e.Blocks && g.player.FoV.Seen(p) && g.player.FoV.Visible(p) {
+		if e.Position != nil && e.Position.Current.X == p.X && e.Position.Current.Y == p.Y && e.IsBlocking != nil && g.player.FoV.Seen(p) && g.player.FoV.Visible(p) {
 			return true
 		}
 	}
 	return false
 }
 
-func (g *Game) setTargetPosition(x, y int) {
+func (g *Game) setTargetPosition(x, y int32) {
 	g.movementPath = g.determinePathPlayerMouse()
-	g.player.TargetPosition = components.Position{X: x, Y: y}
+	g.player.TargetPosition = utils.Vec2{X: x, Y: y}
 }
 
 func (g *Game) drawMainMenu() {
@@ -201,9 +201,9 @@ func (g *Game) updateFoVs() {
 			continue
 		}
 		if e.Mutations.Has(components.MutationEffectXRay) {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, true)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position.Current, true)
 		} else {
-			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), *e.Position, false)
+			fov.UpdateFoV(g.currentGameMap, e.FoV, e.Vision.Range+e.Mutations.GetData(components.MutationEffectIncreasedVision), e.Position.Current, false)
 		}
 	}
 }

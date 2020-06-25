@@ -1,6 +1,6 @@
 {
     "Name": "Inventory",
-    "Glyph": {
+    "Appearance": {
         "Char": "i",
         "Color": {
             "R": 100,

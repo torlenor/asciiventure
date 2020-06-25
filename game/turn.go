@@ -6,11 +6,12 @@ import (
 	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/pathfinding"
+	"github.com/torlenor/asciiventure/utils"
 )
 
-func (g *Game) blocked(x, y int) (*entity.Entity, bool) {
+func (g *Game) blocked(p utils.Vec2) (*entity.Entity, bool) {
 	for _, e := range g.entities {
-		if e.Blocks == true && e.Position.X == x && e.Position.Y == y && g.player.FoV.Seen(components.Position{X: x, Y: y}) {
+		if e.IsBlocking != nil && e.Position.Current.Equal(p) && g.player.FoV.Seen(p) {
 			return e, true
 		}
 	}
@@ -19,8 +20,8 @@ func (g *Game) blocked(x, y int) (*entity.Entity, bool) {
 
 // killEntity declares the entity dead.
 func (g *Game) killEntity(e *entity.Entity) {
-	e.Blocks = false
-	e.Dead = true
+	e.IsBlocking = nil
+	e.IsDead = &components.IsDead{}
 	g.ui.AddLogEntry(fmt.Sprintf("%s is dead.", e.Name))
 }
 
@@ -42,10 +43,10 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 
 func (g *Game) updatePositions(state gameState) {
 	for _, e := range g.entities {
-		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.Dead || e.Position == nil {
+		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.IsDead != nil || e.Position == nil {
 			continue
 		}
-		var newPosition components.Position
+		var newPosition utils.Vec2
 		if e == g.player {
 			if len(g.movementPath) > 0 {
 				newPosition = g.movementPath[0]
@@ -54,40 +55,41 @@ func (g *Game) updatePositions(state gameState) {
 			}
 		} else {
 			if e.AI != nil {
-				var path []components.Position
-				if g.currentGameMap.Distance(*g.player.Position, e.InitialPosition) <= float64(e.AI.AttackRange) && g.currentGameMap.Distance(*e.Position, e.InitialPosition) <= float64(e.AI.AttackRangeUntil) {
-					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, *e.Position, *g.player.Position)
+				var path []utils.Vec2
+				if g.currentGameMap.Distance(g.player.Position.Current, e.Position.Initial) <= float64(e.AI.AttackRange) && g.currentGameMap.Distance(e.Position.Current, e.Position.Initial) <= float64(e.AI.AttackRangeUntil) {
+					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position.Current, g.player.Position.Current)
 				} else {
-					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, *e.Position, e.InitialPosition)
+					path = pathfinding.DetermineAstarPath(g.currentGameMap, g, e.Position.Current, e.Position.Initial)
 				}
 				if len(path) > 0 {
 					newPosition = path[0]
 				}
 			}
 		}
-		if newPosition.Equal(*e.Position) {
+		if newPosition.Equal(e.Position.Current) {
 			continue
 		}
-		roomEmpty := g.currentGameMap.Empty(newPosition.X, newPosition.Y)
-		blockingE, blocked := g.blocked(newPosition.X, newPosition.Y)
+		roomEmpty := g.currentGameMap.Empty(newPosition)
+		blockingE, blocked := g.blocked(newPosition)
 		if roomEmpty && !blocked {
 			e.MoveTo(newPosition)
 			if e == g.player {
 				if len(g.movementPath) > 0 {
 					g.movementPath = g.movementPath[1:]
 				} else {
-					g.movementPath = []components.Position{}
-					e.TargetPosition = *e.Position
+					g.movementPath = []utils.Vec2{}
+					e.TargetPosition = e.Position.Current
 				}
 			}
 		} else if blocked {
 			if e.Combat != nil && blockingE.Combat != nil && !(e != g.player && blockingE != g.player) {
 				g.combat(e, blockingE)
-				e.TargetPosition = *e.Position
-				g.movementPath = []components.Position{}
+				g.movementPath = []utils.Vec2{}
+				e.TargetPosition = e.Position.Current
 			}
 		} else if !roomEmpty {
-			e.TargetPosition = *e.Position
+			g.movementPath = []utils.Vec2{}
+			e.TargetPosition = e.Position.Current
 		}
 	}
 }

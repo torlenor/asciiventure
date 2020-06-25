@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/utils"
 )
 
 func (g *Game) updateUI() {
@@ -16,8 +17,8 @@ func (g *Game) updateStatusBar() {
 		if e == nil || e.Position == nil {
 			continue
 		}
-		if e.Position.Equal(components.Position{X: int(targetX), Y: int(targetY)}) && e != g.player {
-			if e.Dead {
+		if e.Position.Current.Equal(utils.Vec2{X: targetX, Y: targetY}) && e != g.player {
+			if e.IsDead != nil {
 				g.ui.SetStatusBarText(e.Name + "(Dead)")
 			} else {
 				if e.Item != nil {
@@ -31,7 +32,7 @@ func (g *Game) updateStatusBar() {
 			return
 		}
 	}
-	if g.currentGameMap.IsPortal(components.Position{X: int(targetX), Y: int(targetY)}) {
+	if g.currentGameMap.IsPortal(utils.Vec2{X: targetX, Y: targetY}) {
 		g.ui.SetStatusBarText("Stairs to next map. Press 'g' to use them.")
 	} else {
 		g.ui.SetStatusBarText("")

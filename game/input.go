@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/torlenor/asciiventure/components"
+	"github.com/torlenor/asciiventure/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -73,48 +74,48 @@ func (g *Game) NotifyCommand(command command) {
 	if g.gameState == playersTurn {
 		switch command {
 		case CommandMoveN:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.Y = g.player.Position.Current.Y - 1
 			g.nextStep = true
 		case CommandMoveNE:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X + 1
-			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X + 1
+			g.player.TargetPosition.Y = g.player.Position.Current.Y - 1
 			g.nextStep = true
 		case CommandMoveE:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X + 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X + 1
 			g.nextStep = true
 		case CommandMoveSE:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X + 1
-			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X + 1
+			g.player.TargetPosition.Y = g.player.Position.Current.Y + 1
 			g.nextStep = true
 		case CommandMoveS:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.Y = g.player.Position.Current.Y + 1
 			g.nextStep = true
 		case CommandMoveSW:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X - 1
-			g.player.TargetPosition.Y = g.player.Position.Y + 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X - 1
+			g.player.TargetPosition.Y = g.player.Position.Current.Y + 1
 			g.nextStep = true
 		case CommandMoveW:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X - 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X - 1
 			g.nextStep = true
 		case CommandMoveNW:
-			g.movementPath = []components.Position{}
-			g.player.TargetPosition = *g.player.Position
-			g.player.TargetPosition.X = g.player.Position.X - 1
-			g.player.TargetPosition.Y = g.player.Position.Y - 1
+			g.movementPath = []utils.Vec2{}
+			g.player.TargetPosition = g.player.Position.Current
+			g.player.TargetPosition.X = g.player.Position.Current.X - 1
+			g.player.TargetPosition.Y = g.player.Position.Current.Y - 1
 			g.nextStep = true
 		case CommandScrollUp:
 			g.renderer.OriginY += 2
@@ -190,6 +191,7 @@ func (g *Game) NotifyCommand(command command) {
 			case MainMenuActionStartGame:
 				g.gameInProgress = true
 				g.gameState = playersTurn
+				g.player.IsDead = nil
 			case MainMenuActionQuit:
 				g.quit = true
 			}
@@ -211,6 +213,6 @@ func (g *Game) NotifyMouseCommand(buttonLeft, buttonMiddle, buttonRight bool, x,
 		g.updateMouseTile(int(x), int(y))
 	}
 	if buttonLeft {
-		g.setTargetPosition(int(g.mouseTileX), int(g.mouseTileY))
+		g.setTargetPosition(g.mouseTileX, g.mouseTileY)
 	}
 }

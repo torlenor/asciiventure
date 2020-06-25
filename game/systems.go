@@ -9,7 +9,7 @@ func (g *Game) pickupSystem() {
 	for _, e := range g.entities {
 		if e.Actor != nil && e.Actor.NextAction == components.ActionTypeInteract {
 			for _, target := range g.entities {
-				if target != nil && (target.Item != nil || target.Mutagen != nil) && target.Position != nil && target.Position.Equal(*e.Position) {
+				if target != nil && (target.Item != nil || target.Mutagen != nil) && target.Position != nil && target.Position.Current.Equal(e.Position.Current) {
 					if target.Item != nil {
 						result := e.PickUpItem(target)
 						for _, r := range result {

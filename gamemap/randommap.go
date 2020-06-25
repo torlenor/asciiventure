@@ -4,7 +4,6 @@ import (
 	"math/rand"
 
 	"github.com/torlenor/asciiventure/assets"
-	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/utils"
 )
 
@@ -44,7 +43,7 @@ Loop:
 		newX, newY := newRoom.center()
 
 		if i == 0 {
-			gameMap.SpawnPoint = components.Position{X: int(newX), Y: int(newY)}
+			gameMap.SpawnPoint = utils.Vec2{X: int32(newX), Y: int32(newY)}
 		} else {
 			prevX, prevY := rooms[len(rooms)-1].center()
 			if rand.Intn(2) == 0 {
@@ -60,7 +59,7 @@ Loop:
 	}
 
 	mapChangeX, mapChangeY := rooms[len(rooms)-1].center()
-	gameMap.MapChangePoint = components.Position{X: mapChangeX, Y: mapChangeY}
+	gameMap.MapChangePoint = utils.Vec2{X: int32(mapChangeX), Y: int32(mapChangeY)}
 	gameMap.Tiles[int(mapChangeY)][int(mapChangeX)] = Tile{Char: "+",
 		Opaque:          false,
 		Blocking:        false,

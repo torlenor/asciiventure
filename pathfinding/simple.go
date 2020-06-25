@@ -1,11 +1,13 @@
 package pathfinding
 
-import "github.com/torlenor/asciiventure/components"
+import (
+	"github.com/torlenor/asciiventure/utils"
+)
 
 // DetermineStraightLinePath returns the straightest possible path from start to goal.
-func DetermineStraightLinePath(start components.Position, goal components.Position) []components.Position {
+func DetermineStraightLinePath(start utils.Vec2, goal utils.Vec2) []utils.Vec2 {
 	current := start
-	s := []components.Position{}
+	s := []utils.Vec2{}
 	for goal.X != current.X || goal.Y != current.Y {
 		if current.X < goal.X {
 			current.X++
@@ -17,8 +19,7 @@ func DetermineStraightLinePath(start components.Position, goal components.Positi
 		} else if current.Y > goal.Y {
 			current.Y--
 		}
-		lp := components.Position{X: current.X, Y: current.Y}
-		s = append(s, lp)
+		s = append(s, current)
 	}
 	return s
 }

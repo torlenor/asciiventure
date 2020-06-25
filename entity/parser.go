@@ -4,20 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/torlenor/asciiventure/components"
 )
 
 type entityData struct {
-	Name    string                 `json:"Name"`
-	Glyph   *components.Renderable `json:"Glyph"`
-	Health  *components.Health     `json:"Health"`
-	Combat  *components.Combat     `json:"Combat"`
-	AI      *components.AI         `json:"AI"`
-	Vision  *components.Vision     `json:"Vision"`
-	Item    *components.Item       `json:"Item"`
-	Mutagen *components.Mutation   `json:"Mutagen"`
+	Name       string                 `json:"Name"`
+	Appearance *components.Appearance `json:"Appearance"`
+	Health     *components.Health     `json:"Health"`
+	Combat     *components.Combat     `json:"Combat"`
+	AI         *components.AI         `json:"AI"`
+	Vision     *components.Vision     `json:"Vision"`
+	Item       *components.Item       `json:"Item"`
+	Mutagen    *components.Mutation   `json:"Mutagen"`
 }
 
 // ParseJSON parses a JSON and returns its entity.
@@ -32,7 +31,7 @@ func ParseJSON(filename string) (*Entity, error) {
 
 	e := NewEmptyEntity()
 	e.Name = data.Name
-	e.Renderable = data.Glyph
+	e.Appearance = data.Appearance
 	e.Health = data.Health
 	e.Combat = data.Combat
 	e.AI = data.AI
@@ -41,21 +40,4 @@ func ParseJSON(filename string) (*Entity, error) {
 	e.Mutagen = data.Mutagen
 
 	return e, nil
-}
-
-// ParseItem parses a item description and returns the corresponding entity.
-func ParseItem(filename string) *Entity {
-	e, err := ParseJSON(filename)
-	if err != nil || e == nil {
-		log.Printf("%s", err)
-		return nil
-	}
-
-	if e.Item == nil {
-		log.Printf("Not a item entity file")
-		return nil
-	}
-	e.Blocks = true
-
-	return e
 }

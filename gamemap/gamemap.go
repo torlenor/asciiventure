@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/torlenor/asciiventure/assets"
-	"github.com/torlenor/asciiventure/components"
 	"github.com/torlenor/asciiventure/entity"
 	"github.com/torlenor/asciiventure/renderers"
 	"github.com/torlenor/asciiventure/utils"
@@ -31,8 +30,8 @@ type GameMap struct {
 
 	Entities *[]*entity.Entity
 
-	SpawnPoint     components.Position
-	MapChangePoint components.Position
+	SpawnPoint     utils.Vec2
+	MapChangePoint utils.Vec2
 
 	notSeenGlyph renderers.Glyph
 
@@ -66,13 +65,13 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 		cntX := -1
 		for _, r := range l {
 			cntX++
-			x := int(cntX)
+			x := int32(cntX)
 			c := string(r)
 			if c == "@" {
 				if spawnPointSet {
 					log.Printf("Warning: Player spawn point defined more than once")
 				}
-				room.SpawnPoint = components.Position{X: int(x), Y: int(y)}
+				room.SpawnPoint = utils.Vec2{X: x, Y: int32(y)}
 				spawnPointSet = true
 				c = " "
 			}
@@ -80,7 +79,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 				if mapChangePointSet {
 					log.Printf("Warning: Map change point defined more than once")
 				}
-				room.MapChangePoint = components.Position{X: int(x), Y: int(y)}
+				room.MapChangePoint = utils.Vec2{X: x, Y: int32(y)}
 				mapChangePointSet = true
 				c = " "
 			}
@@ -115,7 +114,7 @@ func NewGameMapFromReader(r io.Reader, glyphTexture *assets.GlyphTexture) (GameM
 }
 
 // Distance returns the distance between two points on the map.
-func (r GameMap) Distance(a components.Position, b components.Position) float64 {
+func (r GameMap) Distance(a utils.Vec2, b utils.Vec2) float64 {
 	dx := b.X - a.X
 	dy := b.Y - a.Y
 	return math.Sqrt(float64(dx*dx + dy*dy))
@@ -123,14 +122,14 @@ func (r GameMap) Distance(a components.Position, b components.Position) float64 
 
 // Empty returns true if the specified coordinates of the room are empty
 // and inside the map boundaries.
-func (r *GameMap) Empty(x, y int) bool {
+func (r *GameMap) Empty(p utils.Vec2) bool {
 	maxx, maxy := r.Dimensions()
-	if x > maxx || x < 0 || y > maxy || y < 0 {
+	if p.X > maxx || p.X < 0 || p.Y > maxy || p.Y < 0 {
 		return false
 	}
 
-	if y, ok := r.Tiles[y]; ok {
-		if x, ok := y[x]; ok {
+	if y, ok := r.Tiles[int(p.Y)]; ok {
+		if x, ok := y[int(p.X)]; ok {
 			if x.Blocking {
 				return false
 			}
@@ -140,21 +139,21 @@ func (r *GameMap) Empty(x, y int) bool {
 }
 
 // Opaque returns true if the specified position is not transparent.
-func (r *GameMap) Opaque(p components.Position) bool {
-	return r.Tiles[p.Y][p.X].Opaque
+func (r *GameMap) Opaque(p utils.Vec2) bool {
+	return r.Tiles[int(p.Y)][int(p.X)].Opaque
 }
 
 // Dimensions returns the max width and height of the room.
-func (r *GameMap) Dimensions() (int, int) {
-	maxx := int(0)
-	maxy := int(0)
+func (r *GameMap) Dimensions() (int32, int32) {
+	maxx := int32(0)
+	maxy := int32(0)
 	for y, r := range r.Tiles {
-		if y > maxy {
-			maxy = y
+		if int32(y) > maxy {
+			maxy = int32(y)
 		}
 		for x := range r {
-			if x > maxx {
-				maxx = x
+			if int32(x) > maxx {
+				maxx = int32(x)
 			}
 		}
 	}
@@ -162,7 +161,7 @@ func (r *GameMap) Dimensions() (int, int) {
 }
 
 // InDimensions returns true if the specified position is inside the map dimensions
-func (r *GameMap) InDimensions(p components.Position) bool {
+func (r *GameMap) InDimensions(p utils.Vec2) bool {
 	maxx, maxy := r.Dimensions()
 	if p.X > maxx || p.X < 0 || p.Y > maxy || p.Y < 0 {
 		return false
@@ -171,12 +170,13 @@ func (r *GameMap) InDimensions(p components.Position) bool {
 }
 
 // Neighbors returns the empty neighbors for a given point
-func (r *GameMap) Neighbors(p components.Position) []components.Position {
-	var neighbors []components.Position
-	for x := int(-1); x <= 1; x++ {
-		for y := int(-1); y <= 1; y++ {
-			if r.Empty(p.X+x, p.Y+y) {
-				neighbors = append(neighbors, components.Position{X: p.X + x, Y: p.Y + y})
+func (r *GameMap) Neighbors(p utils.Vec2) []utils.Vec2 {
+	var neighbors []utils.Vec2
+	for x := int32(-1); x <= 1; x++ {
+		for y := int32(-1); y <= 1; y++ {
+			n := p.Add(utils.Vec2{X: x, Y: y})
+			if r.Empty(n) {
+				neighbors = append(neighbors, n)
 			}
 		}
 	}
@@ -185,7 +185,7 @@ func (r *GameMap) Neighbors(p components.Position) []components.Position {
 }
 
 // IsPortal returns true if the location is a portal to another map.
-func (r *GameMap) IsPortal(p components.Position) bool {
+func (r *GameMap) IsPortal(p utils.Vec2) bool {
 	if p.Equal(r.MapChangePoint) {
 		return true
 	}

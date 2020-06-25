@@ -1,6 +1,6 @@
 {
     "Name": "Dog",
-    "Glyph": {
+    "Appearance": {
         "Char": "d",
         "Color": {
             "R": 255,

@@ -2,8 +2,8 @@ package components
 
 import "github.com/torlenor/asciiventure/utils"
 
-// Renderable holds all data needed to display the entity on the screen.
-type Renderable struct {
+// Appearance holds all data related to the visual appearance of an entity.
+type Appearance struct {
 	Char  string          `json:"Char"`
 	Color utils.ColorRGBA `json:"Color"`
 }

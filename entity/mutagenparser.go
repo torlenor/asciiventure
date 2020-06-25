@@ -12,11 +12,10 @@ func ParseMutagen(filename string) *Entity {
 		return nil
 	}
 
-	if e.Mutagen == nil {
+	if e.Mutagen == nil || e.Appearance == nil {
 		log.Printf("Not a mutagen entity file")
 		return nil
 	}
-	e.Blocks = true
 
 	return e
 }

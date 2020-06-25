@@ -1,6 +1,6 @@
 {
     "Name": "XRay",
-    "Glyph": {
+    "Appearance": {
         "Char": "x",
         "Color": {
             "R": 100,

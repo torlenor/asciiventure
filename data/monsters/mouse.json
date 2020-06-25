@@ -1,6 +1,6 @@
 {
     "Name": "Mouse",
-    "Glyph": {
+    "Appearance": {
         "Char": "m",
         "Color": {
             "R": 200,

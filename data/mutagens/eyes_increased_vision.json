@@ -1,6 +1,6 @@
 {
     "Name": "Increased Vision",
-    "Glyph": {
+    "Appearance": {
         "Char": "v",
         "Color": {
             "R": 100,

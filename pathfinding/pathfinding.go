@@ -1,19 +1,17 @@
 package pathfinding
 
-import (
-	"github.com/torlenor/asciiventure/components"
-)
+import "github.com/torlenor/asciiventure/utils"
 
 // Graph represents the graph on which the pathfinding shall be performed.
 type Graph interface {
-	Opaque(p components.Position) bool
-	InDimensions(p components.Position) bool
-	Neighbors(p components.Position) []components.Position
-	Distance(a components.Position, b components.Position) float64
+	Opaque(p utils.Vec2) bool
+	InDimensions(p utils.Vec2) bool
+	Neighbors(p utils.Vec2) []utils.Vec2
+	Distance(a utils.Vec2, b utils.Vec2) float64
 }
 
 // Obstacles are positions which block the path finding algorithm.
 // En example would be enemies or locked doors.
 type Obstacles interface {
-	Occupied(p components.Position) bool
+	Occupied(p utils.Vec2) bool
 }
