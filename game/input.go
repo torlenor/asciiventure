@@ -68,11 +68,10 @@ func (g *Game) setupInput() {
 
 // NotifyCommand will be called from commandManager when a registered command is received.
 func (g *Game) NotifyCommand(command command) {
-	if command == CommandQuit {
-		g.gameState = mainMenu
-	}
 	if g.gameState == playersTurn {
 		switch command {
+		case CommandQuit:
+			g.gameState = mainMenu
 		case CommandMoveN:
 			g.movementPath = []utils.Vec2{}
 			g.player.TargetPosition = g.player.Position.Current
@@ -195,6 +194,8 @@ func (g *Game) NotifyCommand(command command) {
 			case MainMenuActionQuit:
 				g.quit = true
 			}
+		case CommandQuit:
+			g.quit = true
 		case CommandMoveN:
 			g.mainMenu.MoveCursor(0, -1)
 		case CommandMoveE:
