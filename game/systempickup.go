@@ -6,6 +6,7 @@ import (
 )
 
 func (g *Game) pickupSystem() {
+	// TODO: Maybe split Item and Mutagen pickup/drop system into two systems
 	for _, e := range g.entities {
 		if e.Actor != nil && e.Actor.NextAction == components.ActionTypeInteract {
 			for _, target := range g.entities {
@@ -32,23 +33,7 @@ func (g *Game) pickupSystem() {
 					}
 				}
 			}
-		}
-	}
-}
-
-func (g *Game) useSystem() {
-	for _, e := range g.entities {
-		if e.Actor != nil && e.Actor.NextAction == components.ActionTypeUseItem {
-			if item := e.Inventory.PopOneByID(e.Actor.IntValue); item != nil {
-				result := e.UseItem(item)
-				for _, r := range result {
-					switch r.Type {
-					case entity.ActionResultItemUsed:
-					case entity.ActionResultMessage:
-						g.ui.AddLogEntry(r.StringValue)
-					}
-				}
-			}
+			e.Actor = nil
 		}
 	}
 }

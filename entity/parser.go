@@ -19,6 +19,8 @@ type entityData struct {
 	Mutagen    *components.Mutation   `json:"Mutagen"`
 }
 
+// TODO: Make it possible to parse one JSON file containing many entity definitions.
+
 // ParseJSON parses a JSON and returns its entity.
 func ParseJSON(filename string) (*Entity, error) {
 	file, _ := ioutil.ReadFile(filename)

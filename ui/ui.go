@@ -11,6 +11,8 @@ import (
 	"github.com/torlenor/asciiventure/renderers"
 )
 
+// TODO: Come up with a nice UI layout
+
 // UI holds all functions and data related to the UI.
 type UI struct {
 	r *renderers.Renderer

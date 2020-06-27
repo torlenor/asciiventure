@@ -17,6 +17,8 @@ var (
 	bcSelected = utils.ColorRGBA{R: 255, G: 255, B: 255, A: 255}
 )
 
+// TODO: Move MainMenu out of the 'game' package
+
 // MainMenu represents the main menu of the game
 type MainMenu struct {
 	selectedOption int32

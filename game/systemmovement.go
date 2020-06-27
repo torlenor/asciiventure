@@ -26,6 +26,7 @@ func (g *Game) killEntity(e *entity.Entity) {
 }
 
 func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
+	// TODO: Combat shall be randomized based on the Power and Defense parameters provided by entity and target
 	results := e.Attack(target)
 	for _, result := range results {
 		if result.Type == entity.CombatResultTakeDamage {
@@ -41,7 +42,7 @@ func (g *Game) combat(e *entity.Entity, target *entity.Entity) {
 	}
 }
 
-func (g *Game) updatePositions(state gameState) {
+func (g *Game) movementSystem(state gameState) {
 	for _, e := range g.entities {
 		if (state == playersTurn && e != g.player) || (state == enemyTurn && e == g.player) || e.IsDead != nil || e.Position == nil {
 			continue

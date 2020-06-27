@@ -183,8 +183,13 @@ func (g *Game) draw() {
 
 func (g *Game) timestep() {
 	if g.nextStep {
-		g.updatePositions(playersTurn)
-		g.updatePositions(enemyTurn)
+		g.movementSystem(playersTurn)
+		g.movementSystem(enemyTurn)
+
+		g.pickupSystem()
+		g.useSystem()
+		g.regenerationSystem()
+
 		g.updateFoVs()
 
 		g.time++

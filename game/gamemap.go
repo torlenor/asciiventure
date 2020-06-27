@@ -41,6 +41,7 @@ func (g *Game) loadGameMapsFromDirectory(dir string) {
 }
 
 func (g *Game) selectGameMap(r int) {
+	// TODO: Do not pre-generate/pre-load maps but generate them on map change
 	if len(g.loadedGameMaps) == 0 {
 		log.Fatalf("No maps loaded")
 	}

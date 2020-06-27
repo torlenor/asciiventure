@@ -11,6 +11,7 @@ import (
 
 // Entity defines an entity in our entity-component-system system
 type Entity struct {
+	// TODO: Get rid of TargetPosition and move that into a component
 	TargetPosition utils.Vec2
 
 	Actor      *components.Actor
@@ -26,9 +27,12 @@ type Entity struct {
 	Position   *components.Position
 	Vision     *components.Vision
 
+	// TODO: Move FoV of the entity into the Vision component
 	FoV fov.FoVMap
 
 	Inventory *Inventory
+
+	// TODO: How many mutations are we allowed to have?
 	Mutations components.Mutations
 }
 

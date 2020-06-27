@@ -24,21 +24,8 @@ func (g *Game) performPlayerAction(at components.ActionType, intValue int) {
 			g.selectGameMap(g.currentGamMapID + 1)
 		}
 	case components.ActionTypeDropItem:
-		// if len(g.player.Inventory) > 0 {
-		// 	result := g.player.DropItem(g.player.Inventory[len(g.player.Inventory)-1])
-		// 	for _, r := range result {
-		// 		switch r.Type {
-		// 		case entity.ActionResultItemDropped:
-		// 			g.nextStep = true
-		// 		case entity.ActionResultMessage:
-		// 			g.ui.AddLogEntry(r.StringValue)
-		// 		}
-		// 	}
-		// }
+		// TODO: Implement DropItem
 	case components.ActionTypeUseItem:
 		g.player.Actor.IntValue = intValue
 	}
-
-	g.pickupSystem()
-	g.useSystem()
 }

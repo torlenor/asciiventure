@@ -68,7 +68,12 @@ func (g *Game) setupInput() {
 
 // NotifyCommand will be called from commandManager when a registered command is received.
 func (g *Game) NotifyCommand(command command) {
-	if g.gameState == playersTurn {
+	if g.gameState == gameOver {
+		switch command {
+		case CommandQuit:
+			g.gameState = mainMenu
+		}
+	} else if g.gameState == playersTurn {
 		switch command {
 		case CommandQuit:
 			g.gameState = mainMenu
@@ -191,6 +196,7 @@ func (g *Game) NotifyCommand(command command) {
 				g.gameInProgress = true
 				g.gameState = playersTurn
 				g.player.IsDead = nil
+				// TODO: Reset everything and generate new maps when a new game starts
 			case MainMenuActionQuit:
 				g.quit = true
 			}

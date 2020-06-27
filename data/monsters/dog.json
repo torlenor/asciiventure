@@ -15,7 +15,8 @@
     },
     "Health": {
         "HP": 10,
-        "CurrentHP": 10
+        "CurrentHP": 10,
+        "Regeneration": 1
     },
     "AI": {
         "AttackRange": 10,
