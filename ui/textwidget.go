@@ -129,7 +129,7 @@ func (w *TextWidget) Render() {
 	r.GetDrawBlendMode(&bm)
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.SetDrawColor(0, 0, 0, 255)
-	r.SetClipRect(w.dst)
+	// r.SetClipRect(w.dst) // This breaks rendering somehow
 	r.FillRect(w.dst)
 	if w.drawBorder {
 		r.SetDrawColor(255, 255, 255, 255)
@@ -148,7 +148,7 @@ func (w *TextWidget) Render() {
 		r.Copy(w.text, nil, &ldst)
 	}
 
-	r.SetClipRect(nil)
+	// r.SetClipRect(nil)
 }
 
 // Clear clears the content of the TextWidget.
